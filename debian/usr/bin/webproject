@@ -1,0 +1,177 @@
+#!/bin/bash -eu
+
+if [ "$#" -lt 2 ]; then
+  webproject-usage; exit 1;
+fi
+declare -r NULL=;
+declare -r PROJECT_NAME=${1};
+case ${2} in
+  "new") ;&
+  "extend") ;&
+  "update") ;&
+  "reset")
+    declare -r PROCESS_TYPE=${2};
+    ;;
+  *)
+    webproject-usage; exit 1;
+    ;;
+esac
+
+shift 2;
+declare DOMAIN=;
+declare APPLICATION_NAME=;
+declare DOMAIN_TO_COPY=;
+while (( "$#" )); do
+  case $1 in
+    "--domain")
+      DOMAIN=${2};
+      ;;
+    "--application")
+      APPLICATION_NAME=${2};
+      ;;
+    "--copy")
+      DOMAIN_TO_COPY=${2};
+      ;;
+    *)
+      webproject-usage; exit 1;
+      ;;
+  esac
+  shift 2
+done
+
+LAN=; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *lan ]]; then LAN=".lan"; LAN_HOSTNAME=`echo ${HOSTNAME} | sed 's/\(.*\)-lan/\1.lan/'`; fi
+VIRTUAL_HOST_FILE=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
+declare -r VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
+
+case ${PROCESS_TYPE} in
+  "new" )
+    sudo echo "BUILDING: '${HOME}/Projects/${PROJECT_NAME}'";
+
+    if [[ -d "${HOME}/Projects/${PROJECT_NAME}" ]]; then
+      echo "  ...FAILED! Project already exists!";
+      exit 3;
+    fi
+    /bin/mkdir -pv "${HOME}/Projects/${PROJECT_NAME}";
+    /bin/cp -dR /etc/webshop/skel/base/* "${HOME}/Projects/${PROJECT_NAME}";
+
+    if [[ "${DOMAIN}" == "${NULL}" ]]; then
+      DOMAIN=`echo "${PROJECT_NAME}" | sed 's/ //g'`;
+      DOMAIN="${DOMAIN,,}.tld";
+    fi
+    virtualhost "${PROJECT_NAME}" add "${DOMAIN}";
+
+    if [[ "${APPLICATION_NAME}" != "${NULL}" ]]; then
+      echo "ADDING APPLICATION SKELETON: '${HOME}/Projects/${PROJECT_NAME}'";
+      /bin/cp -dR /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
+    fi
+
+    if [[ "${DOMAIN_TO_COPY}" != "${NULL}" ]]; then
+      copy-current-website "${PROJECT_NAME}" ${DOMAIN_TO_COPY};
+    fi
+
+    echo "RELOADING WEB SERVER";
+    sudo a2ensite ${VIRTUAL_HOST_FILE} && sudo service apache2 reload;
+    ;;
+
+  "extend" )
+    if [[
+      ("${APPLICATION_NAME}" != "${NULL}") &&
+      (
+        (-d "${HOME}/Projects/${PROJECT_NAME}/code/") ||
+        (-d "${HOME}/Projects/${PROJECT_NAME}/02-userRequierments/") ||
+        (-d "${HOME}/Projects/${PROJECT_NAME}/04-Systemdesign/")
+      )
+    ]]; then
+      echo "  ...FAILED! there are indication that a web application skeleton has already been added!";
+      echo "  If you wish to 'update' or 'reset' the web application skeleton please use the correct command.";
+      exit 4;
+    fi
+
+    if [[ ("${DOMAIN_TO_COPY}" != "${NULL}") && (-d "${HOME}/Projects/${PROJECT_NAME}/copy") ]]; then
+      echo "  ...FAILED! '${HOME}/Projects/${PROJECT_NAME}/copy' already exists!";
+      echo "  If you wish to 'update/reset' the copy please use one of the correct commands.";
+      exit 5;
+    fi
+
+    sudo echo "EXTENDING RELEVANT FEATURE(S)";
+
+    if [[ "${DOMAIN}" != "${NULL}" ]]; then
+      echo "ADDING ALIAS ${DOMAIN} TO VIRTUAL HOST";
+      sudo /bin/sed "4i\  ServerAlias ${DOMAIN}" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}" > "/tmp/${VIRTUAL_HOST_FILE}";
+      sudo /bin/mv "/tmp/${VIRTUAL_HOST_FILE}" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}";
+    fi
+
+    if [[ "${APPLICATION_NAME}" != "${NULL}" ]]; then
+      echo "ADDING APPLICATION SKELETON: '${HOME}/Projects/${PROJECT_NAME}'";
+      `/bin/cp -dR /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}"`;
+    fi
+
+    if [[ "${DOMAIN_TO_COPY}" != "${NULL}" ]]; then
+      copy-current-website "${PROJECT_NAME}" ${DOMAIN_TO_COPY};
+    fi
+
+    echo "RELOADING WEB SERVER";
+    sudo service apache2 reload;
+    ;;
+
+  "update" )
+    sudo echo "UPDATING RELEVANT FEATURE(S)";
+
+    if [[ "${DOMAIN}" != "${NULL}" ]]; then
+      CURRENT_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
+      echo "Changing Primary Domain for this project, from ${CURRENT_DOMAIN} TO ${DOMAIN}";
+      sudo /bin/sed -i "s/${CURRENT_DOMAIN}/${DOMAIN}/g" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}";
+      sudo /usr/bin/mmv -r "/var/www/*${CURRENT_DOMAIN}" "#1${DOMAIN}"
+      echo "RELOADING WEB SERVER";
+      sudo service apache2 reload;
+    fi
+
+    if [[ "${APPLICATION_NAME}" != "${NULL}" ]]; then
+      echo "UPDATING APPLICATION SKELETON: '${HOME}/Projects/${PROJECT_NAME}'";
+      /bin/cp -dRuvi /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
+    fi
+
+    if [[ "${DOMAIN_TO_COPY}" != "${NULL}" ]]; then
+      copy-current-website "${PROJECT_NAME}" ${DOMAIN_TO_COPY};
+    fi
+    ;;
+
+  "reset" )
+    sudo echo "RESETING RELEVANT FEATURE(S)";
+
+    if [[ "${DOMAIN}" != "${NULL}" ]]; then
+      echo "Reseting the primary domain name for '${PROJECT_NAME}' will DELETE all aliases.";
+      read -p "ARE YOU SURE YOU WISH TO CONTINUE WITH THIS ACTION (y/n)?" -n 1 -r
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo " ...RESETTING PRIMARY DOMAIN NAME.";
+        sudo virtualhost ${PROJECT_NAME} remove;
+        sudo virtualhost ${PROJECT_NAME} add ${DOMAIN};
+        if [[ -d "${HOME}/Projects/${PROJECT_NAME}/copy" ]]; then
+          echo "ADDING SUB DOMAIN: copy.${DOMAIN}";
+          sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/copy" "/var/www/copy.${DOMAIN}";
+          sudo virtualhost-append-copy ${VIRTUAL_HOST_FILE} ${DOMAIN};
+        fi
+        echo "RELOADING WEB SERVER";
+        sudo a2ensite ${VIRTUAL_HOST_FILE} && sudo service apache2 reload
+      fi
+      echo;
+    fi
+
+    if [[ "${APPLICATION_NAME}" != "${NULL}" ]]; then
+      echo "Reseting web application skeleton '${HOME}/Projects/${PROJECT_NAME}', will REMOVE developer added files.";
+      read -p "ARE YOU SURE YOU WISH TO CONTINUE WITH THIS ACTION (y/n)?" -n 1 -r
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo " ...RESETTING WEB APPLICATION SKELETON.";
+        /bin/cp -dRvfi /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
+      fi
+      echo;
+    fi
+
+    if [[ "${DOMAIN_TO_COPY}" != "${NULL}" ]]; then
+      copy-current-website "${PROJECT_NAME}" ${DOMAIN_TO_COPY};
+    fi
+    ;;
+esac
+
+echo "PROCESS SUCCESFULLY COMPLETED!";
+exit 0;

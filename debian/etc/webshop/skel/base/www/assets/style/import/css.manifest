@@ -1,0 +1,24 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Default CSS Manifest base on Snook's
+;Scalable and Modular Architecture for CSS
+;http://smacss.com/book/
+
+;Primary HTML elements such as the body,
+;form tags, links...
+base
+
+;How the page is divided into sections
+;including headers, footers, sidebars...
+layout
+
+;Discrete, reusable, modular components, e.g.
+;navigation bars, product lists, contact forms...
+moduals
+
+;How modules or layouts change when in a
+;specific state, e.g. errors, hidden,
+;expanded, active
+state
+
+;
+;print

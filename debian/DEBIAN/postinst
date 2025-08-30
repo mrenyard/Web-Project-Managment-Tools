@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "CHECKING FOR EXISTANCE OF ${HOME}/Projetcs/.manifest";
+if [ ! -d ${HOME}/Projects/ ]; then
+  mkdir ${HOME}/Projetcs;
+fi
+if [ ! -f ${HOME}/Projects/.manifest ]; then
+  echo "...ADDING ${HOME}/Projetcs/.manifest file"
+  touch ${HOME}/Projects/.manifest;
+#  sudo chmod 755 postinst;
+#  sudo chown ${USER}:${USER} postinst;
+fi
+declare DOMAIN=${HOSTNAME}.lan
+virtualhosts-from-manifest;

@@ -1,0 +1,69 @@
+#!/bin/bash -u
+
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+SCRIPT=`readlink -f $0`; SCRIPTPATH=`dirname "$SCRIPT"`; cd "$SCRIPTPATH";
+PROCESS_TYPE=; if [ "$#" -eq 0 ]; then PROCESS_TYPE="--build"; else PROCESS_TYPE=${1}; fi
+case ${PROCESS_TYPE} in
+  "--deploy") ;&
+  "--purge") ;&
+  "--build")
+    if [ "$0" != "tools/package" ]; then
+      echo "Must be run from parent project containing directory NOT $0";
+      exit 1;
+    fi
+    if [[ $EUID -ne 0 ]]; then
+       echo "This script must be run as root" 1>&2;
+       exit 1;
+    fi
+    read -p "Save package as location/name_version-release_architecture.deb [../webproject-tools_0.1-0_all.deb]: " SAVE_AS;
+    SAVE_AS=${SAVE_AS:-"../webproject-tools_0.1-0_all.deb"};
+  case ${PROCESS_TYPE} in
+    "--deploy") ;&
+    "--purge") ;&
+    "--build")
+      echo "BUILDING..."
+      if [ -f ${SAVE_AS} ]; then rm -f ${SAVE_AS}; fi
+      if [ ! $(getent group developer) ]; then sudo addgroup developer; fi
+      sudo chmod -R 755 ../debian
+      sudo chown -R root:root ../debian/usr;
+      sudo chown -R root:root ../debian/etc;
+      sudo chown -R root:root ../debian/var;
+      sudo chown -R www-data:www-data ../debian/etc/webshop/skel/application/www;
+      sudo chown -R www-data:www-data ../debian/etc/webshop/skel/base/www;
+      sudo chown -R www-data:www-data ../debian/var/www/
+      sudo dpkg-deb --build ../debian;
+      echo "renaming '../debian.deb' to '${SAVE_AS}'";
+      mv ../debian.deb ${SAVE_AS};
+      sudo chmod 775 ${SAVE_AS};
+      sudo chown ${USER}:developer ${SAVE_AS};
+      sudo chown -R ${USER}:${USER} ../debian;
+      echo "BUILD SUCCESFULLY COMPLETED!";
+      ;;
+  esac
+  case ${PROCESS_TYPE} in
+    "--deploy") ;&
+    "--purge")
+      echo "PURGING...";
+      sudo apt-get -y purge webproject-tools;
+      echo "PURGE SUCCESFULLY COMPLETED!";
+      ;;
+  esac
+  case ${PROCESS_TYPE} in
+    "--deploy")
+      echo "DEPLOYING..."
+      sudo dpkg -i ${SAVE_AS};
+      if [ $? -ne 0 ]; then
+        echo "REINSTALL WITH DEPENDANCIES";
+        sudo dpkg -i ${SAVE_AS};
+        cd "$SCRIPTPATH";
+        sudo apt-get -yf install
+      fi
+      echo "DEPLOY SUCCESFULLY COMPLETED!";
+      ;;
+  esac
+    ;;
+  *)
+    echo "USAGE: ...";
+    exit 1
+    ;;
+esac

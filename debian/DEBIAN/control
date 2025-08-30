@@ -1,0 +1,11 @@
+Package: webproject-tools
+Version: 0.1
+Section: base
+Priority: optional
+Architecture: all
+Depends: bash, apache2-webshop-conf, certbot, python3-certbot-apache, httrack, mmv
+Enhances: ramp
+Maintainer: renyard.m@gmail.com
+Description: Web Project Management Tools for WebShop.
+  Utilities to manage the creation and management of WebShop web projects:
+  webproject (primary), virtualhost, copy-current-website, virtualhost-get-domain

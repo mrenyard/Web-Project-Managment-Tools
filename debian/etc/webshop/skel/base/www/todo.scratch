@@ -1,0 +1,5 @@
+<ol>
+  <li><del>Apache server configuration file
+  <li>Merge html5-boilerplate and justified-php-boilerplate to produre new biolerplate for all websites
+  <li>add symbolic links to ~/Projects/skel/www/ for project creation.
+</ol>

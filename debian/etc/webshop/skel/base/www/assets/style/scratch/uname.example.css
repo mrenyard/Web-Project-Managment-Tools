@@ -1,0 +1,45 @@
+/*
+ * {UNAME} SCRATCH
+ *
+ * Default CSS Manifest modified from Snook's
+ * Scalable and Modular Architecture for CSS
+ * http://smacss.com/book/
+ */
+
+/* ===============================================================================================
+   BASE    - Primary HTML elements such as the body, form tags, links...
+   ============================================================================================ */
+
+
+
+
+/* ===============================================================================================
+   LAYOUT  - How the page is divided into sections including headers, footers, sidebars...
+             example: screen-width:1024/16px : @media only screen and (min-width: 64em) { }
+   ============================================================================================ */
+
+
+
+
+/* ===============================================================================================
+   MODUALS - Discrete, reusable, modular components,
+             e.g. navigation bars, product lists, contact forms...
+   ============================================================================================ */
+
+
+
+
+/* ===============================================================================================
+   THEMES  - Reoccuring colour palete for text, links, buttons and background-images...
+   ============================================================================================ */
+
+
+
+
+/* ===============================================================================================
+   STATE   - How modules or layouts change when in a specific state,
+             e.g. errors, hidden, expanded, active
+   ============================================================================================ */
+
+
+

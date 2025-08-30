@@ -1,0 +1,24 @@
+#!/bin/bash -eu
+
+echo "CHECKING manifest file for details";
+
+if [[ "${HOME}" == "/root" ]]; then
+  echo "${HOME} IS AN INVALID HOME PATH!";
+  read -p "Enter username: " USERNAME;
+  HOME=`echo "/home/${USERNAME}"`;
+fi
+
+while read DOMAIN PROJECT; do
+  if [[ ${PROJECT} != '' ]]; then
+    echo "  ADDING ${PROJECT}";
+    sudo virtualhost "${PROJECT}" add ${DOMAIN} --from-manifest;
+
+    VIRTUAL_HOST_FILE=`echo "${PROJECT}" | sed 's/ //g' | sed 's/\//-/g'`;
+    VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
+    sudo a2ensite ${VIRTUAL_HOST_FILE};
+  fi
+done < ${HOME}/Projects/.manifest
+
+sudo service apache2 reload;
+
+exit 0;

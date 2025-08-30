@@ -1,0 +1,17 @@
+#!/bin/bash -eu
+
+if [[ "$#" -lt 1 ]]; then
+  echo "Usage: virtualhost-get-domain VIRTUAL_HOST_FILE";
+  exit 2;
+fi
+
+declare -r VIRTUAL_HOST_FILE=${1};
+
+if [[ ! -f "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf" ]]; then
+    echo "  ...FAILED! Unable to locate Virtual Host File: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}'";
+    exit 1;
+fi
+declare -r PRIMARY_DOMAIN=`sed -n "2 p" /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf | sed -e 's/  ServerName //g' -e 's/.${HOSTNAME}//g'`;
+
+echo ${PRIMARY_DOMAIN};
+exit 0;
