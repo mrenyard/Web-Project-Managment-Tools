@@ -3,7 +3,7 @@
  * Content-Type image/svg+xml
  */
 header('Content-Type: image/svg+xml');
-$imgSize = split('x',strtolower(trim($_SERVER["PATH_INFO"],'/')));
+  $imgSize = explode('x', strtolower(trim($_SERVER["PATH_INFO"], '/')));
 $imgWidth = $imgSize[0];
 $imgHeight = $imgSize[1];
 
