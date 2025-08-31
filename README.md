@@ -1,7 +1,7 @@
-#Web Project Management Tools for WebShop.
-##Utilities to manage the creation and management of WebShop web projects.
+# Web Project Management Tools.
+## Utilities to manage the creation and management of web projects.
 
-###TODO
+### TODO
 Setup local server for testing.
 Write multiple test scenarios based on previous state:
  - ...
