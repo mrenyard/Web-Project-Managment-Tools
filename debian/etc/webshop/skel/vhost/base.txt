@@ -1,71 +1,70 @@
 <VirtualHost *:80>
-  ServerName DOMAIN
-  ServerAlias www.DOMAIN
-  Redirect permanent / https://DOMAIN/
+  ServerName FULL_DOMAIN
+  Redirect permanent / https://FULL_DOMAIN/
 </VirtualHost>
 <VirtualHost *:443>
-  ServerName DOMAIN
-  ServerAlias www.DOMAIN
-  DocumentRoot /var/www/DOMAIN
+  ServerName FULL_DOMAIN
+  ServerAlias www.FULL_DOMAIN
+  DocumentRoot /var/www/FULL_DOMAIN
   SSLEngine on
   SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
   SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
 </VirtualHost>
 
 <VirtualHost *:80>
-  ServerName dev.DOMAIN
-  Redirect permanent / https://dev.DOMAIN/
+  ServerName dev.FULL_DOMAIN
+  Redirect permanent / https://dev.FULL_DOMAIN/
 </VirtualHost>
 <VirtualHost *:443>
-  ServerName dev.DOMAIN
-  DocumentRoot /var/www/dev.DOMAIN
+  ServerName dev.FULL_DOMAIN
+  DocumentRoot /var/www/dev.FULL_DOMAIN
   SSLEngine on
   SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
   SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
 </VirtualHost>
 
 <VirtualHost *:80>
-  ServerName style.DOMAIN
-  Redirect permanent / https://style.DOMAIN/
+  ServerName style.FULL_DOMAIN
+  Redirect permanent / https://style.FULL_DOMAIN/
 </VirtualHost>
 <VirtualHost *:443>
-  ServerName style.DOMAIN
-  DocumentRoot /var/www/style.DOMAIN
+  ServerName style.FULL_DOMAIN
+  DocumentRoot /var/www/style.FULL_DOMAIN
   SSLEngine on
   SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
   SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
 </VirtualHost>
 
 <VirtualHost *:80>
-  ServerName func.DOMAIN
-  Redirect permanent / https://func.DOMAIN/
+  ServerName func.FULL_DOMAIN
+  Redirect permanent / https://func.FULL_DOMAIN/
 </VirtualHost>
 <VirtualHost *:443>
-  ServerName func.DOMAIN
-  DocumentRoot /var/www/func.DOMAIN
+  ServerName func.FULL_DOMAIN
+  DocumentRoot /var/www/func.FULL_DOMAIN
   SSLEngine on
   SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
   SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
 </VirtualHost>
 
 <VirtualHost *:80>
-  ServerName media.DOMAIN
-  Redirect permanent / https://media.DOMAIN/
+  ServerName media.FULL_DOMAIN
+  Redirect permanent / https://media.FULL_DOMAIN/
 </VirtualHost>
 <VirtualHost *:443>
-  ServerName media.DOMAIN
-  DocumentRoot /var/www/media.DOMAIN
+  ServerName media.FULL_DOMAIN
+  DocumentRoot /var/www/media.FULL_DOMAIN
   SSLEngine on
   SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
   SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
 </VirtualHost>
 
-<Directory "/var/www/DOMAIN/private/">
+<Directory "/var/www/FULL_DOMAIN/private/">
   DirectoryIndex index.php
   Options MultiViews
   AuthType Basic
   AuthName "Private"
-  AuthUserFile /var/www/DOMAIN/private/.htpasswd
+  AuthUserFile /var/www/FULL_DOMAIN/private/.htpasswd
   Require valid-user
   AllowOverride None
   Order allow,deny

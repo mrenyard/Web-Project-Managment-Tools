@@ -1,17 +1,17 @@
 #!/bin/bash -eu
 
 if [[ "$#" -lt 1 ]]; then
-  echo "Usage: virtualhost-append-copy VIRTUAL_HOST_FILE[ DOMAIN]";
+  echo "Usage: virtualhost-append-copy VIRTUAL_HOST_FILE[ FULL_DOMAIN]";
   exit 1;
 fi
 
 declare -r VIRTUAL_HOST_FILE=${1};
-declare DOMAIN; if [[ "$#" -eq 2 ]]; then DOMAIN=${2}; else DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`; fi
+declare FULL_DOMAIN; if [[ "$#" -eq 2 ]]; then FULL_DOMAIN=${2}; else FULL_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`; fi
 LAN=; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=".lan"; fi
 
 sudo chmod 777 /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf;
 sudo /bin/cat /etc/webshop/skel/vhost${LAN}/copy.txt >> /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf;
-sudo virtualhost-edit ${VIRTUAL_HOST_FILE} ${DOMAIN};
+sudo virtualhost-edit ${VIRTUAL_HOST_FILE} ${FULL_DOMAIN};
 sudo chmod 664 /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf;
 
 exit 0;

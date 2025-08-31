@@ -9,9 +9,10 @@ declare -r PROJECT_NAME=${1};
 declare -r DOMAIN_TO_COPY=${2};
 VIRTUAL_HOST_FILE=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
 declare -r VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
-declare -r DOMAIN_NAME=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
+declare -r FULL_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
+declare -r DOMAIN=`echo ${FULL_DOMAIN} | sed -e "s/.tld//g" -e "s/.${HOSTNAME}//g"`;
 
-sudo echo "COPYING: http://${DOMAIN_TO_COPY}/ TO '${HOME}/Projects/${PROJECT_NAME}/copy'"
+sudo echo "COPYING: https://${DOMAIN_TO_COPY}/ TO '${HOME}/Projects/${PROJECT_NAME}/copy'"
 httrack "${DOMAIN_TO_COPY}" -O "/tmp/${VIRTUAL_HOST_FILE}" -v
 
 if [[ -d "${HOME}/Projects/${PROJECT_NAME}/copy" ]]; then
@@ -20,15 +21,15 @@ fi
 sudo mv "/tmp/${VIRTUAL_HOST_FILE}/${DOMAIN_TO_COPY}" "${HOME}/Projects/${PROJECT_NAME}/copy";
 sudo rm -R "/tmp/${VIRTUAL_HOST_FILE}";
 
-if [[ ! -L /var/www/copy.${DOMAIN_NAME} ]]; then
-  echo "  ADDING SUB DOMAIN: copy.${DOMAIN_NAME}";
-  sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/copy" "/var/www/copy.${DOMAIN_NAME}";
+if [[ ! -L /var/www/copy.${DOMAIN} ]]; then
+  echo "  ADDING SUB DOMAIN: copy.${DOMAIN}";
+  sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/copy" "/var/www/copy.${DOMAIN}";
 fi
 
 if grep -q "ServerName copy" /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}; then
   echo " VIRTUAL HOST FILE is UP TO DATE";
  else
-  sudo virtualhost-append-copy ${VIRTUAL_HOST_FILE} ${DOMAIN_NAME}
+  sudo virtualhost-append-copy ${VIRTUAL_HOST_FILE} ${FULL_DOMAIN}
 fi
 
 exit 0;

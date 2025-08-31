@@ -1,18 +1,15 @@
 #!/bin/bash -eu
 
 if [[ "$#" -lt 1 ]]; then
-  echo "Usage: virtualhost-edit VIRTUAL_HOST_FILE[ DOMAIN]";
+  echo "Usage: virtualhost-edit VIRTUAL_HOST_FILE[ FULL_DOMAIN]";
   exit 1;
 fi
 
 declare -r VIRTUAL_HOST_FILE=${1};
-declare DOMAIN; if [[ "$#" -eq 2 ]]; then DOMAIN=${2}; else DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`; fi
+declare FULL_DOMAIN; if [[ "$#" -eq 2 ]]; then FULL_DOMAIN=${2}; else FULL_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`; fi
 LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *lan ]]; then LAN_HOSTNAME=`echo ${HOSTNAME} | sed 's/\(.*\)-lan/\1.lan/'`; fi
 
 echo "EDITING VIRTUAL HOST FILE: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf'";
-sudo /bin/sed -i "s/DOMAIN/${DOMAIN}/g" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf";
-if [[ "${LAN_HOSTNAME}" != "" ]]; then
-  sudo /bin/sed -i "s/LAN_HOSTNAME/${LAN_HOSTNAME}/g" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf";
-fi
+sudo /bin/sed -i "s/FULL_DOMAIN/${FULL_DOMAIN}/g" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf";
 sudo echo "  ...COMPLETED!";
 exit 0;

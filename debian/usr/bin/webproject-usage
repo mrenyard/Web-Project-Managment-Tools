@@ -3,7 +3,7 @@
 echo    "Usage: webproject PROJECT_NAME new|extend|update|reset[[ --domain DOMAIN][ --application APP_NAME][ --copy DOMAIN_TO_COPY]]";
 echo -e "Description: Create and Manage Web Project Skeletons.\n";
 echo -e "PROJECT_NAME                    Name of required or 'new' project.\n";
-echo    "new                             generate base project skeleton. If no domain provided use project_name to infer one.";
+echo    "new                             generate base project skeleton. If no domain provided use project_name to infer sub-domain with hostname";
 echo    "  --domain DOMAIN                  use provided domain name for server setup on this project.";
 echo    "  --application APP_NAME           include web application skeleton under project directory.";
 echo -e "  --copy DOMAIN_TO_COPY            include static copy of current website under project directory.\n";

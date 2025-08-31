@@ -1,16 +1,14 @@
 #!/bin/bash -eu
 
-declare -r USAGE_STATEMENT="Usage: virtualhost PROJECT_NAME remove|[add DOMAIN_NAME[ --from-manifest]]";
+declare -r USAGE_STATEMENT="Usage: virtualhost PROJECT_NAME remove|[add DOMAIN[ --from-manifest]]";
 if [[ "$#" -lt 2 ]]; then echo ${USAGE_STATEMENT}; exit 1; fi
 
 declare -r PROJECT_NAME=${1}
 declare -r SWITCH=${2};
 
+LAN=FALSE; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=TRUE; LAN_HOSTNAME=${HOSTNAME}; fi
 VIRTUAL_HOST_FILE=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
 declare -r VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
-
-declare DOMAIN_NAME;
-LAN=; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *lan ]]; then LAN=".lan"; LAN_HOSTNAME=`echo ${HOSTNAME} | sed 's/\(.*\)-lan/\1.lan/'`; fi
 
 if [[ "${HOME}" == "/root" ]]; then
   echo "${HOME} IS AN INVALID HOME PATH!";
@@ -20,7 +18,23 @@ fi
 
 case ${SWITCH} in
   "add")
-    if [[ "$#" -gt 2 ]]; then DOMAIN_NAME=${3}; else echo "  ...FAILED! DOMAIN_NAME requiered!"; exit 2; fi
+    if [[ "$#" -gt 2 ]]; then
+      declare -r DOMAIN=${3};
+    else
+      echo "  ...FAILED! DOMAIN requiered!";
+      exit 2;
+    fi
+    if [[ $DOMAIN == *.* ]]; then
+      FULL_DOMAIN=${DOMAIN};
+    else
+      if [[ "${LAN}" == TRUE ]]; then
+        FULL_DOMAIN="${DOMAIN}.${LAN_HOSTNAME}";
+      else
+        # TODO:mrenyard: change tld to server domain
+        FULL_DOMAIN="${DOMAIN}.tld";
+      fi
+    fi
+
     UPDATE_MANIFEST=true;
     if [[ "$#" -gt 3 ]]; then
      if [ ${4} != "--from-manifest" ]; then echo ${USAGE_STATEMENT}; exit 1; fi
@@ -28,35 +42,37 @@ case ${SWITCH} in
     fi
 
     sudo echo "SETTING UP NEW VIRTUAL HOST: ${VIRTUAL_HOST_FILE}";
-    if [[ ! -L /var/www/${DOMAIN_NAME} ]]; then
+    if [[ ! -L /var/www/${DOMAIN} ]]; then
       echo "  ADDING symbolic links";
-      echo "    ${DOMAIN_NAME}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/${DOMAIN_NAME}";
-      echo "    style.${DOMAIN_NAME}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/style" "/var/www/style.${DOMAIN_NAME}";
-      echo "    func.${DOMAIN_NAME}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/func" "/var/www/func.${DOMAIN_NAME}";
-      echo "    media.${DOMAIN_NAME}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/media" "/var/www/media.${DOMAIN_NAME}";
-      echo "    dev.${DOMAIN_NAME}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/dev.${DOMAIN_NAME}";
+      echo "    ${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/${DOMAIN}";
+      echo "    style.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/style" "/var/www/style.${DOMAIN}";
+      echo "    func.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/func" "/var/www/func.${DOMAIN}";
+      echo "    media.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/media" "/var/www/media.${DOMAIN}";
+      echo "    dev.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/dev.${DOMAIN}";
     fi
     if [[ ! -f /etc/apache2/sites-available/${VIRTUAL_HOST_FILE} ]]; then
       echo "  ADDING virtualhost file: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}'";
-      sudo /bin/cp /etc/webshop/skel/vhost${LAN}/base.txt /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf;
-      sudo virtualhost-edit ${VIRTUAL_HOST_FILE} ${DOMAIN_NAME};
+      sudo /bin/cp /etc/webshop/skel/vhost/base.txt /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf;
+      sudo virtualhost-edit ${VIRTUAL_HOST_FILE} ${FULL_DOMAIN};
     fi
     if $UPDATE_MANIFEST; then
       echo "  UPDATING MANIFEST";
-      echo "${DOMAIN_NAME} ${PROJECT_NAME}" >> ${HOME}/Projects/.manifest;
+      echo "${DOMAIN} ${PROJECT_NAME}" >> ${HOME}/Projects/.manifest;
     fi
     sudo chown -R www-data:www-data /var/www/;
     echo "NEW VIRTUAL HOST SETUP COMPLETE!";
     ;;
 
   "remove")
-    DOMAIN_NAME=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
+    declare -r FULL_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
+    declare -r DOMAIN=`echo ${FULL_DOMAIN} | sed -e "s/.tld//g" -e "s/.${HOSTNAME}//g"`;
+    
     sudo echo "REMOVING VIRTUAL HOST: ${VIRTUAL_HOST_FILE}";
-    echo "  DISSABLING site... ${DOMAIN_NAME}";
+    echo "  DISSABLING site... ${FULL_DOMAIN}";
     sudo a2dissite ${VIRTUAL_HOST_FILE};
-    if [[ -L /var/www/${DOMAIN_NAME} ]]; then
+    if [[ -L /var/www/${DOMAIN} ]]; then
       echo "  REMOVING symbolis links";
-      sudo rm /var/www/*${DOMAIN_NAME};
+      sudo rm /var/www/*${DOMAIN};
     fi
     if [[ -f /etc/apache2/sites-available/${VIRTUAL_HOST_FILE} ]]; then
       echo "  REMOVING virtualhost file: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}'";
@@ -64,7 +80,7 @@ case ${SWITCH} in
     fi
     echo "  UPDATING MANIFEST";
     SAFE_PROJECT_NAME=`echo "${PROJECT_NAME}" | sed -e 's:\/:\\\/:g'`
-    /bin/sed -i "/${DOMAIN_NAME} ${SAFE_PROJECT_NAME}/d" ${HOME}/Projects/.manifest
+    /bin/sed -i "/${DOMAIN} ${SAFE_PROJECT_NAME}/d" ${HOME}/Projects/.manifest
     echo "VIRTUAL HOST REMOVAL COMPLETE!";
     ;;
 
