@@ -1,15 +1,19 @@
 #!/bin/bash -eu
 
-if [[ "$#" -lt 1 ]]; then
-  echo "Usage: virtualhost-edit VIRTUAL_HOST_FILE[ FULL_DOMAIN]";
+if [[ "$#" -lt 2 ]]; then
+  echo "Usage: virtualhost-edit VIRTUAL_HOST_FILE NEW_DOMAIN";
   exit 1;
 fi
 
 declare -r VIRTUAL_HOST_FILE=${1};
-declare FULL_DOMAIN; if [[ "$#" -eq 2 ]]; then FULL_DOMAIN=${2}; else FULL_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`; fi
-LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *lan ]]; then LAN_HOSTNAME=`echo ${HOSTNAME} | sed 's/\(.*\)-lan/\1.lan/'`; fi
+declare -r NEW_DOMAIN=${2};
+if [[ ! -f "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf" ]]; then
+    echo "  ...FAILED! Unable to locate Virtual Host File: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}'";
+    exit 1;
+fi
+declare -r EXISTING_DOMAIN = virtualhost-get-domain ${VIRTUAL_HOST_FILE};
 
 echo "EDITING VIRTUAL HOST FILE: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf'";
-sudo /bin/sed -i "s/FULL_DOMAIN/${FULL_DOMAIN}/g" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf";
+sudo /bin/sed -i "s/${EXISTING_DOMAIN}/${NEW_DOMAIN}/g" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf";
 sudo echo "  ...COMPLETED!";
 exit 0;

@@ -117,10 +117,8 @@ case ${PROCESS_TYPE} in
     sudo echo "UPDATING RELEVANT FEATURE(S)";
 
     if [[ "${DOMAIN}" != "${NULL}" ]]; then
-      CURRENT_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
-      echo "Changing Primary Domain for this project, from ${CURRENT_DOMAIN} TO ${DOMAIN}";
-      sudo /bin/sed -i "s/${CURRENT_DOMAIN}/${DOMAIN}/g" "/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}";
-      sudo /usr/bin/mmv -r "/var/www/*${CURRENT_DOMAIN}" "#1${DOMAIN}"
+      echo "UPDATING PRIMARY DOMAIN NAME TO: ${DOMAIN}";
+      sudo virtualhost-edit ${VIRTUAL_HOST_FILE} ${DOMAIN};
       echo "RELOADING WEB SERVER";
       sudo service apache2 reload;
     fi
