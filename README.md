@@ -8,21 +8,21 @@ Usage: webproject PROJECT_NAME new|extend|update|reset
 | **PROJECT_NAME**              | ****Name of required or 'new' project****                                                          |
 | :---------------------------- | :------------------------------------------------------------------------------------------------- |
 | **new**                       | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)       |
-| `-- domain DOMAIN`            | Use provided domain name for server setup on this project.                                         |
-| `-- application APP_NAME`     | Include web application skeleton under project directory.                                          |
-| `-- copy DOMAIN_TO_COPY`      | Include static copy of current website under project directory.                                    |
+| -- domain&nbsp;DOMAIN         | Use provided domain name for server setup on this project.                                         |
+| -- application&nbsp;APP_NAME  | Include web application skeleton under project directory.                                          |
+| -- copy&nbsp;DOMAIN_TO_COPY   | Include static copy of current website under project directory.                                    |
 | **extend**                    | ***Extend relevant feature(s) if NOT already in use***                                             |
-| `--domain DOMAIN`             | Add provided domain name as an alias on this existing project.                                     |
-| `--application APP_NAME`      | Add web application skeleton under this project directory.                                         |
-| `--copy DOMAIN_TO_COPY`       | Add static copy of current live site to this project.                                              |
+| --domain&nbsp;DOMAIN          | Add provided domain name as an alias on this existing project.                                     |
+| --application&nbsp;APP_NAME   | Add web application skeleton under this project directory.                                         |
+| --copy&nbsp;DOMAIN_TO_COPY    | Add static copy of current live site to this project.                                              |
 | **update**                    | ***Update relevant feature(s)*** (DOES NOT affect developer added files or existing base skeleton) |
-| `--domain DOMAIN`             | Change primary domain name for this project.                                                       |
-| `--application APP_NAME`      | Update web application skeleton. Overwrites old with new. DOES NOT affect developer added files.   |
-| `--copy DOMAIN_TO_COPY`       | Update/reset static copy of current site. OVERWRITES old.                                          |
+| --domain&nbsp;DOMAIN          | Change primary domain name for this project.                                                       |
+| --application&nbsp;APP_NAME   | Update web application skeleton. Overwrites old with new. DOES NOT affect developer added files.   |
+| --copy&nbsp;DOMAIN_TO_COPY    | Update/reset static copy of current site. OVERWRITES old.                                          |
 | **reset**                     | ***Reset relevant feature(s)***                                                                    |
-| `--domain DOMAIN`             | Reset primary domain name for this project DELETING all aliases.                                   |
-| `--application APP_NAME`      | Reset web application skeleton under project directory. REMOVES any developer added files.         |
-| `--copy DOMAIN_TO_COPY`       | Reset/update static copy of current site. OVERWRITES old.                                          |
+| --domain&nbsp;DOMAIN          | Reset primary domain name for this project DELETING all aliases.                                   |
+| --application&nbsp;APP_NAME   | Reset web application skeleton under project directory. REMOVES any developer added files.         |
+| --copy&nbsp;DOMAIN_TO_COPY    | Reset/update static copy of current site. OVERWRITES old.                                          |
 ### virtualhost - Add or Remove Virtual Hosting of Web Project.
 ```
 Usage: virtualhost PROJECT_NAME remove|[add DOMAIN[ --from-manifest]]
@@ -31,8 +31,8 @@ Usage: virtualhost PROJECT_NAME remove|[add DOMAIN[ --from-manifest]]
 | :---------------------------- | :-------------------------------------------------------------------------- |
 | **remove**                    | ***Remove virtual hosting for provided project***                           |
 | **add**                       | ***Add virtual hosting for provided project with associated sub-/domain***  |
-| `DOMAIN`                      | Sub-/domain to be used when adding new virtual host.                        |
-| `--from-manifest`             | Switch to indicate that NO changes should be made to the .manifest file.    |
+| DOMAIN                        | Sub-/domain to be used when adding new virtual host.                        |
+| --from-manifest               | Switch to indicate that NO changes should be made to the .manifest file.    |
 ### virtualhost-edit - Set or Change Virtualhost ServerName.
 ```
 Usage: virtualhost-edit VIRTUAL_HOST_FILE NEW_DOMAIN
@@ -58,8 +58,9 @@ Setup local server for testing.
 Write multiple test scenarios based on previous state:
  - ...
  - 
- - webproject Test1 new [new simple infer domain]
  - HOSTNAME=test-server.lan
+ - webproject Test1 new [new simple infer domain]
+ - 
  - webproject "Test Project Two" new --domain t2 [new sub-domain.${HOSTNAME}]
  - webproject "Test Project three" new --domain project.co.uk [new with full domain]
  - webproject "Test Project Two" remove [remove t2]
