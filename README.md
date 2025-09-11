@@ -7,7 +7,7 @@ Usage: webproject PROJECT_NAME new|extend|update|reset
 ```
 | **PROJECT_NAME**              | ****Name of required or 'new' project****                                                          |
 | :---------------------------- | :------------------------------------------------------------------------------------------------- |
-| **new**                       | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)       |
+| **new** &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;                       | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)       |
 | `-- domain DOMAIN`            | Use provided domain name for server setup on this project.                                         |
 | `-- application APP_NAME`     | Include web application skeleton under project directory.                                          |
 | `-- copy DOMAIN_TO_COPY`      | Include static copy of current website under project directory.                                    |
