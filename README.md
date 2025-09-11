@@ -7,10 +7,17 @@ Usage: webproject PROJECT_NAME new|extend|update|reset
 ```
 | **PROJECT_NAME**              | ****Name of required or 'new' project****                                                          |
 | :---------------------------- | :------------------------------------------------------------------------------------------------- |
+<<<<<<< HEAD
 | **new**                       | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)       |
 | -- domain&nbsp;DOMAIN         | Use provided domain name for server setup on this project.                                         |
 | -- application&nbsp;APP_NAME  | Include web application skeleton under project directory.                                          |
 | -- copy&nbsp;DOMAIN_TO_COPY   | Include static copy of current website under project directory.                                    |
+=======
+| **new** &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;                       | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)       |
+| `-- domain DOMAIN`            | Use provided domain name for server setup on this project.                                         |
+| `-- application APP_NAME`     | Include web application skeleton under project directory.                                          |
+| `-- copy DOMAIN_TO_COPY`      | Include static copy of current website under project directory.                                    |
+>>>>>>> refs/remotes/origin/main
 | **extend**                    | ***Extend relevant feature(s) if NOT already in use***                                             |
 | --domain&nbsp;DOMAIN          | Add provided domain name as an alias on this existing project.                                     |
 | --application&nbsp;APP_NAME   | Add web application skeleton under this project directory.                                         |
