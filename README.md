@@ -27,12 +27,12 @@ Usage: webproject PROJECT_NAME new|extend|update|reset
 ```
 Usage: virtualhost PROJECT_NAME remove|[add DOMAIN[ --from-manifest]]
 ```
-| **PROJECT_NAME**              | ****Name of target project****                                              |
-| :---------------------------- | :-------------------------------------------------------------------------- |
-| **remove**                    | ***Remove virtual hosting for provided project***                           |
-| **add**                       | ***Add virtual hosting for provided project with associated sub-/domain***  |
-| DOMAIN                        | Sub-/domain to be used when adding new virtual host.                        |
-| --from-manifest               | Switch to indicate that NO changes should be made to the .manifest file.    |
+| **PROJECT_NAME**              | ****Name of target project****                                                 |
+| :---------------------------- | :----------------------------------------------------------------------------- |
+| **remove**                    | ***Remove virtual hosting for provided project***                              |
+| **add**                       | ***Add virtual hosting for provided project with associated sub-/domain***     |
+| DOMAIN                        | Sub-/domain to be used when adding new virtual host.                           |
+| --from-manifest               | Switch indicating NO changes to .manifest during addition of existing project. |
 ### virtualhost-edit - Set or Change Virtualhost ServerName.
 ```
 Usage: virtualhost-edit VIRTUAL_HOST_FILE NEW_DOMAIN
@@ -53,15 +53,44 @@ Usage: virtualhost-append-copy VIRTUAL_HOST_FILE
 ```
 Usage: virtualhost-from-manifest
 ```
+
+REQUIERS
+--------
+webproject:
+    webproject-usage
+    virtualhost:
+        virtualhost-edit
+            virtualhost-get-domain
+        virtualhost-get-domain
+    copy-current-website
+        virtualhost-get-domain
+        virtualhost-append-copy
+            virtualhost-get-domain
+
+virtualhosts-from-manifest
+    virtualhost
+        virtualhost-edit
+            virtualhost-get-domain
+        virtualhost-get-domain
+
 ## TODO
 Setup local server for testing.
 Write multiple test scenarios based on previous state:
+- virtualhost-get-domain
+- virtualhost-edit
+- virtualhost TestVH1 add testvh1
+- virtualhost TestVH1 remove
+- virtualhosts-from-manifest
+
+- virtualhost-append-copy
+- copy-current-website
+- ...
+- 
+- HOSTNAME=test-server.lan
  - ...
- - 
- - HOSTNAME=test-server.lan
  - webproject Test1 new [new simple infer domain]
  - 
- - webproject "Test Project Two" new --domain t2 [new sub-domain.${HOSTNAME}]
+ - webproject "Test Project Two" new --domain test2 [new sub-domain.${HOSTNAME}]
  - webproject "Test Project three" new --domain project.co.uk [new with full domain]
  - webproject "Test Project Two" remove [remove t2]
  - HOSTNAME=renyard.cloud

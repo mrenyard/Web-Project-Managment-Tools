@@ -39,9 +39,9 @@ while (( "$#" )); do
   shift 2
 done
 
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 VIRTUAL_HOST_FILE=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
 declare -r VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
-declare -r FULL_DOMAIN=;
 
 case ${PROCESS_TYPE} in
   "new" )
@@ -55,7 +55,7 @@ case ${PROCESS_TYPE} in
     /bin/cp -dR /etc/webshop/skel/base/* "${HOME}/Projects/${PROJECT_NAME}";
 
     if [[ "${DOMAIN}" == "${NULL}" ]]; then
-      DOMAIN=`echo "${PROJECT_NAME}" | sed 's/ //g'`;
+      DOMAIN=`echo "${PROJECT_NAME,,}" | sed 's/ //g'`;
     fi
     virtualhost "${PROJECT_NAME}" add "${DOMAIN}";
 
@@ -110,7 +110,7 @@ case ${PROCESS_TYPE} in
     fi
 
     echo "RELOADING WEB SERVER";
-    sudo service apache2 reload;
+    sudo a2dissite ${VIRTUAL_HOST_FILE} && sudo service apache2 reload;
     ;;
 
   "update" )
@@ -146,7 +146,7 @@ case ${PROCESS_TYPE} in
         if [[ -d "${HOME}/Projects/${PROJECT_NAME}/copy" ]]; then
           echo "ADDING SUB DOMAIN: copy.${DOMAIN}";
           sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/copy" "/var/www/copy.${DOMAIN}";
-          sudo virtualhost-append-copy ${VIRTUAL_HOST_FILE} ${FULL_DOMAIN};
+          sudo virtualhost-append-copy ${VIRTUAL_HOST_FILE} ${DOMAIN};
         fi
         echo "RELOADING WEB SERVER";
         sudo a2ensite ${VIRTUAL_HOST_FILE} && sudo service apache2 reload

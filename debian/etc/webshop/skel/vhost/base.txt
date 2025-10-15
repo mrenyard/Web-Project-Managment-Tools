@@ -4,11 +4,10 @@
 </VirtualHost>
 <VirtualHost *:443>
   ServerName FULL_DOMAIN
-  ServerAlias www.FULL_DOMAIN
-  DocumentRoot /var/www/FULL_DOMAIN
+  DocumentRoot /var/www/HOST
   SSLEngine on
-  SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
-  SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
+  SSLCertificateFile      /etc/apache2/ssl/apache.crt
+  SSLCertificateKeyFile   /etc/apache2/ssl/apache.key
 </VirtualHost>
 
 <VirtualHost *:80>
@@ -17,10 +16,10 @@
 </VirtualHost>
 <VirtualHost *:443>
   ServerName dev.FULL_DOMAIN
-  DocumentRoot /var/www/dev.FULL_DOMAIN
+  DocumentRoot /var/www/dev.HOST
   SSLEngine on
-  SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
-  SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
+  SSLCertificateFile      /etc/apache2/ssl/apache.crt
+  SSLCertificateKeyFile   /etc/apache2/ssl/apache.key
 </VirtualHost>
 
 <VirtualHost *:80>
@@ -29,10 +28,10 @@
 </VirtualHost>
 <VirtualHost *:443>
   ServerName style.FULL_DOMAIN
-  DocumentRoot /var/www/style.FULL_DOMAIN
+  DocumentRoot /var/www/style.HOST
   SSLEngine on
-  SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
-  SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
+  SSLCertificateFile      /etc/apache2/ssl/apache.crt
+  SSLCertificateKeyFile   /etc/apache2/ssl/apache.key
 </VirtualHost>
 
 <VirtualHost *:80>
@@ -41,10 +40,10 @@
 </VirtualHost>
 <VirtualHost *:443>
   ServerName func.FULL_DOMAIN
-  DocumentRoot /var/www/func.FULL_DOMAIN
+  DocumentRoot /var/www/func.HOST
   SSLEngine on
-  SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
-  SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
+  SSLCertificateFile      /etc/apache2/ssl/apache.crt
+  SSLCertificateKeyFile   /etc/apache2/ssl/apache.key
 </VirtualHost>
 
 <VirtualHost *:80>
@@ -53,18 +52,18 @@
 </VirtualHost>
 <VirtualHost *:443>
   ServerName media.FULL_DOMAIN
-  DocumentRoot /var/www/media.FULL_DOMAIN
+  DocumentRoot /var/www/media.HOST
   SSLEngine on
-  SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
-  SSLCertificateKeyFile   /etc/ssl/private/apache-selfsigned.key
+  SSLCertificateFile      /etc/apache2/ssl/apache.crt
+  SSLCertificateKeyFile   /etc/apache2/ssl/apache.key
 </VirtualHost>
 
-<Directory "/var/www/FULL_DOMAIN/private/">
+<Directory "/var/www/HOST/private/">
   DirectoryIndex index.php
   Options MultiViews
   AuthType Basic
   AuthName "Private"
-  AuthUserFile /var/www/FULL_DOMAIN/private/.htpasswd
+  AuthUserFile /var/www/HOST/private/.htpasswd
   Require valid-user
   AllowOverride None
   Order allow,deny

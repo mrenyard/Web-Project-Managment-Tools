@@ -2,11 +2,13 @@
 
 echo "CHECKING manifest file for details";
 
-if [[ "${HOME}" == "/root" ]]; then
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
   echo "${HOME} IS AN INVALID HOME PATH!";
   read -p "Enter username: " USERNAME;
   HOME=`echo "/home/${USERNAME}"`;
 fi
+export HOME;
 
 while read DOMAIN PROJECT; do
   if [[ ${PROJECT} != '' ]]; then

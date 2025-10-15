@@ -1,6 +1,13 @@
-#!/bin/bash -u
+#!/bin/bash -eu
 
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
+  echo "${HOME} IS AN INVALID HOME PATH!";
+  read -p "Enter username: " USERNAME;
+  HOME="/home/${USERNAME}";
+fi
+export HOME;
+
 SCRIPT=`readlink -f $0`; SCRIPTPATH=`dirname "$SCRIPT"`; cd "$SCRIPTPATH";
 PROCESS_TYPE=; if [ "$#" -eq 0 ]; then PROCESS_TYPE="--build"; else PROCESS_TYPE=${1}; fi
 case ${PROCESS_TYPE} in

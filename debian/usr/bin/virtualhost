@@ -10,11 +10,13 @@ LAN=FALSE; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=TRUE; LAN_HO
 VIRTUAL_HOST_FILE=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
 declare -r VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
 
-if [[ "${HOME}" == "/root" ]]; then
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
   echo "${HOME} IS AN INVALID HOME PATH!";
   read -p "Enter username: " USERNAME;
   HOME=`echo "/home/${USERNAME}"`;
 fi
+export HOME;
 
 case ${SWITCH} in
   "add")
@@ -25,13 +27,12 @@ case ${SWITCH} in
       exit 2;
     fi
     if [[ $DOMAIN == *.* ]]; then
-      FULL_DOMAIN=${DOMAIN};
+      FULL_DOMAIN=${DOMAIN,,};
     else
       if [[ "${LAN}" == TRUE ]]; then
-        FULL_DOMAIN="${DOMAIN}.${LAN_HOSTNAME}";
+        FULL_DOMAIN="${DOMAIN,,}.${LAN_HOSTNAME,,}";
       else
-        # TODO:mrenyard: change tld to server domain
-        FULL_DOMAIN="${DOMAIN}.tld";
+        FULL_DOMAIN="${DOMAIN,,}.${HOSTNAME,,}.lan";
       fi
     fi
 
@@ -53,6 +54,7 @@ case ${SWITCH} in
     if [[ ! -f /etc/apache2/sites-available/${VIRTUAL_HOST_FILE} ]]; then
       echo "  ADDING virtualhost file: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}'";
       sudo /bin/cp /etc/webshop/skel/vhost/base.txt /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}.conf;
+      echo "virtualhost-edit ${VIRTUAL_HOST_FILE} ${FULL_DOMAIN};";
       sudo virtualhost-edit ${VIRTUAL_HOST_FILE} ${FULL_DOMAIN};
     fi
     if $UPDATE_MANIFEST; then
@@ -60,19 +62,16 @@ case ${SWITCH} in
       echo "${DOMAIN} ${PROJECT_NAME}" >> ${HOME}/Projects/.manifest;
     fi
     sudo chown -R www-data:www-data /var/www/;
+    sudo a2ensite ${VIRTUAL_HOST_FILE}.conf;
     echo "NEW VIRTUAL HOST SETUP COMPLETE!";
     ;;
 
   "remove")
-    declare -r FULL_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
-    declare -r DOMAIN=`echo ${FULL_DOMAIN} | sed -e "s/.tld//g" -e "s/.${HOSTNAME}//g"`;
-    
     sudo echo "REMOVING VIRTUAL HOST: ${VIRTUAL_HOST_FILE}";
-    echo "  DISSABLING site... ${FULL_DOMAIN}";
     sudo a2dissite ${VIRTUAL_HOST_FILE};
-    if [[ -L /var/www/${DOMAIN} ]]; then
-      echo "  REMOVING symbolis links";
-      sudo rm /var/www/*${DOMAIN};
+    if [[ -L /var/www/${VIRTUAL_HOST_FILE} ]]; then
+      echo "  REMOVING symbolic links";
+      sudo rm /var/www/*${VIRTUAL_HOST_FILE};
     fi
     if [[ -f /etc/apache2/sites-available/${VIRTUAL_HOST_FILE} ]]; then
       echo "  REMOVING virtualhost file: '/etc/apache2/sites-available/${VIRTUAL_HOST_FILE}'";
@@ -80,7 +79,7 @@ case ${SWITCH} in
     fi
     echo "  UPDATING MANIFEST";
     SAFE_PROJECT_NAME=`echo "${PROJECT_NAME}" | sed -e 's:\/:\\\/:g'`
-    /bin/sed -i "/${DOMAIN} ${SAFE_PROJECT_NAME}/d" ${HOME}/Projects/.manifest
+    /bin/sed -i "/${VIRTUAL_HOST_FILE} ${SAFE_PROJECT_NAME}/d" ${HOME}/Projects/.manifest
     echo "VIRTUAL HOST REMOVAL COMPLETE!";
     ;;
 
@@ -89,4 +88,5 @@ case ${SWITCH} in
     ;;
 esac
 
+sudo systemctl reload apache2.service;
 exit 0;

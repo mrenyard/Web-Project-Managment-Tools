@@ -1,0 +1,202 @@
+#!/bin/bash -eu
+
+if [[ "$0" != "tools/test" ]]; then
+  echo "Must be run from parent project containing directory NOT $0";
+  exit 1;
+fi
+
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
+  echo "${HOME} IS AN INVALID HOME PATH!";
+  read -p "Enter username: " USERNAME
+  HOME=`echo "/home/${USERNAME}"`;
+fi
+export HOME;
+
+RESPONSE=;
+log_response () {
+  echo -e $1;
+  RESPONSE+="$1\n";
+}
+
+sudo tools/package --deploy;
+
+# virtualhost-get-domain
+echo "TESTING virtualhost-get-domain";
+DEFAULT=`virtualhost-get-domain 000-default`
+if [[ "${DEFAULT}" != www.${HOSTNAME}.lan ]]; then
+  log_response "virtualhost-get-domain Test \e[0;31mFAILED!\e[0m";
+else
+  log_response "virtualhost-get-domain Test \e[0;32mSUCCESSFULL\e[0m"; 
+fi
+
+# virtualhost-edit
+echo "TESTING virtualhost-edit";
+echo "SETTING UP pre test";
+sudo /bin/cp /etc/webshop/skel/vhost/base.txt /etc/apache2/sites-available/testedit.conf;
+sudo virtualhost-edit testedit edit.${HOSTNAME}.lan;
+if [[ ! -z $(grep "ServerName edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf") ]]; then
+  if [[ ! -z $(grep "DocumentRoot /var/www/testedit" "/etc/apache2/sites-available/testedit.conf") ]]; then
+    log_response "virtualhost-edit \e[0;32mSUCCESSFULL\e[0m";
+  else
+    log_response "virtualhost-edit Test \e[0;31mFAILED!\e[0m - unable to confirm DocumentRoot";
+  fi
+else
+  log_response "virtualhost-edit Test \e[0;31mFAILED!\e[0m - unable to confirm ServerName";
+fi
+sudo rm /etc/apache2/sites-available/testedit.conf;
+
+# virtualhost TestVH1 add testvh1
+echo "TESTING virtualhost add";
+echo "SETTING UP pre test";
+/bin/mkdir -pv "${HOME}/Projects/TestVH1";
+/bin/cp -dR /etc/webshop/skel/base/* "${HOME}/Projects/TestVH1";
+sudo virtualhost TestVH1 add testvh1;
+if [[ -d "/var/www/testvh1" ]]; then
+  if [[ -d "/var/www/style.testvh1" ]]; then
+    if [[ -d "/var/www/func.testvh1" ]]; then
+      if [[ -d "/var/www/media.testvh1" ]]; then
+        if [[ -d "/var/www/dev.testvh1" ]]; then
+          if [[ -f "/etc/apache2/sites-enabled/testvh1.conf" ]]; then
+            if [[ ! -z $(grep "testvh1 TestVH1" "${HOME}/Projects/.manifest") ]]; then
+              if curl -sk --head https://testvh1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.." > /dev/null; then
+                log_response "TestVH1 add Test \e[0;32mSUCCESSFULL\e[0m";
+              else
+                log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testvh1.${HOSTNAME}.lan is live";
+              fi
+            else
+              log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest";            
+            fi
+          else
+            log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testvh1.conf";
+          fi
+        else
+          log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testvh1";
+        fi
+      else
+        log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testvh1";
+      fi
+    else
+      log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testvh1";
+    fi
+  else
+    log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testvh1";
+  fi
+else
+  log_response "TestVH1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/testvh1";
+fi
+
+# virtualhost TestVH1 remove
+echo "TESTING virtualhost remove";
+sudo virtualhost TestVH1 remove;
+if [[ -d "/var/www/testvh1" ]]; then
+  log_response "TestVH1 remove Test \e[0;31mFAILED!\e[0m - verify to absence of /var/www/testvh1";
+else 
+  if [[ -d "/var/www/style.testvh1" ]]; then
+    log_response "TestVH1 remove Test \e[0;31mFAILED!\e[0m - unable to verify absence of /var/www/style.testvh1";
+  else
+    if [[ -d "/var/www/func.testvh1" ]]; then
+      log_response "TestVH1 remove Test \e[0;31mFAILED!\e[0m - unable to verify absence of /var/www/func.testvh1";
+    else
+      if [[ -d "/var/www/media.testvh1" ]]; then
+        log_response "TestVH1 remove Test \e[0;31mFAILED!\e[0m - unable to verify absence of /var/www/media.testvh1";
+      else
+        if [[ -d "/var/www/dev.testvh1" ]]; then
+          log_response "TestVH1 remove Test \e[0;31mFAILED!\e[0m - unable to verify absence of /var/www/dev.testvh1";
+        else
+          if [[ -f "/etc/apache2/sites-available/testvh1.conf" ]]; then
+            if [[ ! -z $(grep "testvh1 TestVH1" "${HOME}/Projects/.manifest") ]]; then
+              log_response "TestVH1 remove Test \e[0;31mFAILED!\e[0m - unable to confirm absence of entry in .manifest";              
+            else
+              log_response "TestVH1 remove Test \e[0;32mSUCCESSFULL\e[0m";
+            fi
+          else
+            log_response "TestVH1 remove Test \e[0;31mFAILED!\e[0m - unable to verify absence of /etc/apache2/sites-avalible/testvh1.conf";
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+
+# virtualhosts-from-manifest
+echo "TESTING virtualhosts-from-manifest";
+echo "SETTING UP pre test";
+echo "testvh1 TestVH1" >> ${HOME}/Projects/.manifest;
+/bin/mkdir -pv "${HOME}/Projects/TestVH2";
+/bin/cp -dR /etc/webshop/skel/base/* "${HOME}/Projects/TestVH2";
+echo "testvh2 TestVH2" >> ${HOME}/Projects/.manifest;
+virtualhosts-from-manifest
+if [[ -d "/var/www/testvh1" ]]; then
+  if [[ -d "/var/www/style.testvh1" ]]; then
+    if [[ -d "/var/www/func.testvh1" ]]; then
+      if [[ -d "/var/www/media.testvh1" ]]; then
+        if [[ -d "/var/www/dev.testvh1" ]]; then
+          if [[ -f "/etc/apache2/sites-available/testvh1.conf" ]]; then
+            if [[ ! -z $(grep "testvh1 TestVH1" "${HOME}/Projects/.manifest") ]]; then
+              if [[ -d "/var/www/testvh2" ]]; then
+                if [[ -d "/var/www/style.testvh2" ]]; then
+                  if [[ -d "/var/www/func.testvh2" ]]; then
+                    if [[ -d "/var/www/media.testvh2" ]]; then
+                      if [[ -d "/var/www/dev.testvh2" ]]; then
+                        if [[ -f "/etc/apache2/sites-available/testvh2.conf" ]]; then
+                          if [[ ! -z $(grep "testvh2 TestVH2" "${HOME}/Projects/.manifest") ]]; then
+                            log_response "virtualhosts-from-manifest \e[0;32mSUCCESSFULL\e[0m";
+                          else
+                            log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest testvh2";            
+                          fi
+                        else
+                          log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testvh2.conf";
+                        fi
+                      else
+                        log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testvh2";
+                      fi
+                    else
+                      log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testvh2";
+                    fi
+                  else
+                    log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testvh2";
+                  fi
+                else
+                  log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testvh2";
+                fi
+              else
+                log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/testvh2";
+              fi
+            else
+              log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest testvh1";            
+            fi
+          else
+            log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testvh1.conf";
+          fi
+        else
+          log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testvh1";
+        fi
+      else
+        log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testvh1";
+      fi
+    else
+      log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testvh1";
+    fi
+  else
+    log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testvh1";
+  fi
+else
+  log_response "virtualhosts-from-manifest \e[0;31mFAILED!\e[0m - unable to localte /var/www/testvh1";
+fi
+
+# CLEAN UP
+echo "CLEAN UP";
+sudo a2dissite test*.conf;
+sudo sed -i "/testvh1 TestVH1/d" ${HOME}/Projects/.manifest;
+sudo sed -i "/testvh2 TestVH2/d" ${HOME}/Projects/.manifest;
+sudo rm -rf ${HOME}/Projects/TestVH1;
+sudo rm -rf ${HOME}/Projects/TestVH2;
+sudo rm /etc/apache2/sites-available/test*.conf;
+sudo rm -rf /var/www/test*;
+sudo rm -rf /var/www/*.test*;
+sudo systemctl reload apache2.service;
+
+echo -e "\nTESTING COMPLETE\n";
+echo -e $RESPONSE;
+exit 0;

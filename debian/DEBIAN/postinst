@@ -1,14 +1,22 @@
 #!/bin/bash
 
-echo "CHECKING FOR EXISTANCE OF ${HOME}/Projetcs/.manifest";
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
+  echo "${HOME} IS AN INVALID HOME PATH!";
+  read -p "Enter username: " USERNAME;
+  HOME=`echo "/home/${USERNAME}"`;
+fi
+export HOME;
+
+echo "CHECKING FOR EXISTANCE OF ${HOME}/Projects/.manifest";
 if [ ! -d ${HOME}/Projects/ ]; then
-  mkdir ${HOME}/Projetcs;
+  mkdir ${HOME}/Projects;
 fi
 if [ ! -f ${HOME}/Projects/.manifest ]; then
-  echo "...ADDING ${HOME}/Projetcs/.manifest file"
+  echo "...ADDING ${HOME}/Projects/.manifest file"
   touch ${HOME}/Projects/.manifest;
-#  sudo chmod 755 postinst;
-#  sudo chown ${USER}:${USER} postinst;
+  #sudo chmod 755 postinst;
+  #sudo chown ${USER}:${USER} postinst;
 fi
 declare DOMAIN=${HOSTNAME}.lan
-virtualhosts-from-manifest;
+#virtualhosts-from-manifest;
