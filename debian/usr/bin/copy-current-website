@@ -1,35 +1,48 @@
 #!/bin/bash -eu
 
 if [[ "$#" -lt 2 ]]; then
-  echo "Usage: copy-current-website PROJECT_NAME DOMAIN_TO_COPY";
+  echo "Usage: copy-current-website \"PROJECT_NAME\" COPY_DOMAIN";
   exit 2;
 fi
 
-declare -r PROJECT_NAME=${1};
-declare -r DOMAIN_TO_COPY=${2};
-VIRTUAL_HOST_FILE=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
-declare -r VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
-declare -r FULL_DOMAIN=`virtualhost-get-domain ${VIRTUAL_HOST_FILE}`;
-declare -r DOMAIN=`echo ${FULL_DOMAIN} | sed -e "s/.tld//g" -e "s/.${HOSTNAME}//g"`;
+PROJECT_NAME=${1};
+declare -r COPY_DOMAIN=${2};
+declare -r PROJECT_NAME=`echo ${PROJECT_NAME} | sed 's/"//g'`;
+HOST=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
+declare -r HOST="${HOST,,}";
+declare -r FULL_DOMAIN=`virtualhost-get-domain ${HOST}`;
+declare -r DOMAIN=`echo ${FULL_DOMAIN} | sed -e "s/.tld//g" -e "s/.${HOSTNAME}.lan//g"`;
 
-sudo echo "COPYING: https://${DOMAIN_TO_COPY}/ TO '${HOME}/Projects/${PROJECT_NAME}/copy'"
-httrack "${DOMAIN_TO_COPY}" -O "/tmp/${VIRTUAL_HOST_FILE}" -v
-
-if [[ -d "${HOME}/Projects/${PROJECT_NAME}/copy" ]]; then
- sudo rm -R "${HOME}/Projects/${PROJECT_NAME}/copy";
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
+  echo "${HOME} IS AN INVALID HOME PATH!";
+  read -p "Enter username: " USERNAME;
+  HOME=`echo "/home/${USERNAME}"`;
 fi
-sudo mv "/tmp/${VIRTUAL_HOST_FILE}/${DOMAIN_TO_COPY}" "${HOME}/Projects/${PROJECT_NAME}/copy";
-sudo rm -R "/tmp/${VIRTUAL_HOST_FILE}";
+export HOME;
+
+sudo echo "COPYING: https://${COPY_DOMAIN}/ TO '${HOME}/Projects/${PROJECT_NAME}/copy'"
+httrack "${COPY_DOMAIN}" -O "/tmp/${HOST}" -v
+
+if [[ ! -d "${HOME}/Projects/${PROJECT_NAME}/copy" ]]; then
+  sudo mkdir "${HOME}/Projects/${PROJECT_NAME}/copy";
+  sudo chown -R ${USER}:${USER} "${HOME}/Projects/${PROJECT_NAME}/copy";
+  sudo chmod -R 755 "${HOME}/Projects/${PROJECT_NAME}/copy";
+fi
+sudo mv -f /tmp/${HOST}/${COPY_DOMAIN}/* "${HOME}/Projects/${PROJECT_NAME}/copy/";
+sudo rm -R "/tmp/${HOST}";
 
 if [[ ! -L /var/www/copy.${DOMAIN} ]]; then
   echo "  ADDING SUB DOMAIN: copy.${DOMAIN}";
   sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/copy" "/var/www/copy.${DOMAIN}";
+  sudo chown -R www-data:www-data "/var/www/copy.${HOST}";
+  sudo chmod -R 755 "/var/www/copy.${HOST}";
 fi
 
-if grep -q "ServerName copy" /etc/apache2/sites-available/${VIRTUAL_HOST_FILE}; then
+if grep -q "ServerName copy" /etc/apache2/sites-available/${HOST}; then
   echo " VIRTUAL HOST FILE is UP TO DATE";
- else
-  sudo virtualhost-append-copy ${VIRTUAL_HOST_FILE} ${FULL_DOMAIN}
+else
+  sudo virtualhost-append-copy ${HOST} ${FULL_DOMAIN}
 fi
 
 exit 0;

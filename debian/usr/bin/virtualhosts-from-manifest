@@ -1,7 +1,5 @@
 #!/bin/bash -eu
 
-echo "CHECKING manifest file for details";
-
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
   echo "${HOME} IS AN INVALID HOME PATH!";
@@ -10,17 +8,18 @@ if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
 fi
 export HOME;
 
-while read DOMAIN PROJECT; do
-  if [[ ${PROJECT} != '' ]]; then
-    echo "  ADDING ${PROJECT}";
-    sudo virtualhost "${PROJECT}" add ${DOMAIN} --from-manifest;
+if [[ ! -f ${HOME}/Projects/.manifest ]]; then
+  echo "  ...FAILED! MANIFEST file not found!";
+  exit 1;
+fi
 
-    VIRTUAL_HOST_FILE=`echo "${PROJECT}" | sed 's/ //g' | sed 's/\//-/g'`;
-    VIRTUAL_HOST_FILE="${VIRTUAL_HOST_FILE,,}";
-    sudo a2ensite ${VIRTUAL_HOST_FILE};
-  fi
+echo "CHECKING manifest file for details";
+
+while read DOMAIN PROJECT_NAME; do
+  PROJECT_NAME=`echo ${PROJECT_NAME} | sed 's/"//g'`;
+  echo "  ADDING ${DOMAIN} \"${PROJECT_NAME}\"";
+  bash -c "virtualhost \"${PROJECT_NAME}\" add ${DOMAIN} --from-manifest";
 done < ${HOME}/Projects/.manifest
 
-sudo service apache2 reload;
-
+sudo systemctl restart apache2;
 exit 0;

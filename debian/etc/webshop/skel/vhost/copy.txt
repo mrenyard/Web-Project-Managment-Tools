@@ -1,11 +1,11 @@
 
 <VirtualHost *:80>
-  ServerName copy.PRIMARY_DOMAIN
-  Redirect permanent / https://copy.PRIMARY_DOMAIN/
+  ServerName copy.FULL_DOMAIN
+  Redirect permanent / https://copy.FULL_DOMAIN/
 </VirtualHost>
 <VirtualHost *:443>
-  ServerName copy.PRIMARY_DOMAIN
-  DocumentRoot /var/www/copy.PRIMARY_DOMAIN
+  ServerName copy.FULL_DOMAIN
+  DocumentRoot /var/www/copy.HOST
   SSLEngine on
   SSLCertificateFile      /etc/apache2/ssl/apache.crt
   SSLCertificateKeyFile   /etc/apache2/ssl/apache.key
