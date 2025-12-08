@@ -5,7 +5,7 @@
 Usage: webproject "PROJECT_NAME" new|extend|update|reset   
 [[ --domain DOMAIN][ --application][ --copy COPY_DOMAIN]]
 ```
-| **PROJECT_NAME**                  | ****Name of required or 'new' project****                                                          |
+| **PROJECT_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**| **Name of required or 'new' project**                                                          |
 | :-------------------------------- | :---------------------------------------------------------------------------------------------     |
 | **new**                           | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)       |
 | --domain&nbsp;DOMAIN              | Use provided domain name for server setup on this project.                                         |
