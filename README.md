@@ -5,7 +5,7 @@
 Usage: webproject "PROJECT_NAME" new|extend|update|reset   
 [[ --domain DOMAIN][ --application][ --copy COPY_DOMAIN]]
 ```
-| **PROJECT_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**| **Name of required or 'new' project**                                                          |
+| **PROJECT_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** | **Name of required or 'new' project**                                     |
 | :-------------------------------- | :---------------------------------------------------------------------------------------------     |
 | **new**                           | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)       |
 | --domain&nbsp;DOMAIN              | Use provided domain name for server setup on this project.                                         |
@@ -15,7 +15,7 @@ Usage: webproject "PROJECT_NAME" new|extend|update|reset
 | --domain&nbsp;DOMAIN              | Add provided domain name as an alias on this existing project.                                     |
 | --application                     | Add web application skeleton under this project directory.                                         |
 | --copy&nbsp;COPY_DOMAIN           | Add static copy of current live site to this project.                                              |
-| **update**                        | ***Update relevant feature(s)*** (DOES NOT affect developer added files or existing base skeleton) |
+| **update**                        | ***Update relevant feature(s)*** (DOES NOT affect developer added files) |
 | --domain&nbsp;DOMAIN              | Change primary domain name for this project.                                                       |
 | --application                     | Update web application skeleton. Overwrites old with new. DOES NOT affect developer added files.   |
 | --copy&nbsp;COPY_DOMAIN           | Update/reset static copy of current site. OVERWRITES old.                                          |
