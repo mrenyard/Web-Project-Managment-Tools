@@ -5,7 +5,7 @@
 Usage: webproject "PROJECT_NAME" new|extend|update|reset   
 [[ --domain DOMAIN][ --application][ --copy COPY_DOMAIN]]
 ```
-| **PROJECT_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** | **Name of required or 'new' project** |
+| **PROJECT_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** | ***Name of required or 'new' project*** |
 | :-----------------------| :--------------------------------------------------------------- |
 | **new**                 | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)|
 | --domain&nbsp;DOMAIN    | Use provided domain name for server setup on this project.       |
@@ -41,30 +41,35 @@ Usage: virtualhosts-from-manifest
 ```
 Usage: virtualhost-edit HOST NEW_DOMAIN
 ```
-| **HOST**                | Virtualhost filename to be modified                             |
-| **NEW_DOMAIN**          | Domain to be changed or set as ServerName.                      |
+| **HOST**                | ***Virtualhost filename to be modified***                       |
+| :-----------------------| :-------------------------------------------------------------- |
+| **NEW_DOMAIN**          | ***Domain to be changed or set as ServerName.***                |
 ### virtualhost-get-domain - Get Domain (ServerName) from VIRTUAL_HOST_FILE. 
 ```
 Usage: virtualhost-get-domain HOST
 ```
-| **HOST**                | Virtualhost filename to get domain (ServerName) from.           |
+| **HOST**                | ***Virtualhost filename to get domain (ServerName) from.***     |
+| :-----------------------| :-------------------------------------------------------------- |
 ### copy-current-website - Make Copy existing Site Under 'copy' sub-domain. 
 ```
 Usage: copy-current-website "PROJECT_NAME" COPY_DOMAIN
 ```
-| **PROJECT_NAME**        | Name of target project to make a static copy of current website under. |
-| **COPY_DOMAIN**         | Domain of of current website to make a static copy of.                 |
+| **PROJECT_NAME**        | ***Name of target project to make a static copy of current website under.*** |
+| :-----------------------| :--------------------------------------------------------------------------- |
+| **COPY_DOMAIN**         | ***Domain of of current website to make a static copy of.***                 |
 ### virtualhost-append-copy - Add virtualhost sub-domain 'copy.'.
 ```
 Usage: virtualhost-append-copy HOST
 ```
-| **HOST**                | Virtualhost filename to append 'copy' sub-domain on.           |
+| **HOST**                | ***Virtualhost filename to append 'copy' sub-domain on.***      |
+| :-----------------------| :-------------------------------------------------------------- |
 ### get-full-domain - Checks local subdomain structure to determine full domain.
 ```
 Usage: get-full-domain DOMAIN
 ```
-| **DOMAIN**              | Sub-/domain to be modified and or qualified as FULL_DOMAIN.    |
-##Dependency Tree
+| **DOMAIN**              | ***Sub-/domain to be modified and or qualified as FULL_DOMAIN.*** |
+| :-----------------------| :---------------------------------------------------------------- |
+## Dependency Tree
 ```
 webproject: "PROJECT_NAME" ...
     webproject-usage:
@@ -91,16 +96,16 @@ Setup local server for testing.
 Write multiple test scenarios based on previous state:
 
 - get-full-domain
-- virtualhost-get-domain
-- virtualhost-edit
-- virtualhost TestVH1 add testvh1
-- virtualhost TestVH1 remove
-- virtualhosts-from-manifest
-- virtualhost-edit (change domain) testvh1
-- virtualhost-append-copy
-- copy-current-website
-- webproject testwp1 new (basic)
-- webproject testwp2(t2) new (with all extras)
-- webproject extend (with all extras)
+- ~~virtualhost-get-domain~~
+- ~~virtualhost-edit~~
+- ~~virtualhost TestVH1 add testvh1~~
+- ~~virtualhost TestVH1 remove~~
+- ~~virtualhosts-from-manifest~~
+- ~~virtualhost-edit (change domain) testvh1~~
+- ~~virtualhost-append-copy~~
+- ~~copy-current-website~~
+- ~~webproject testwp1 new (basic)~~
+- ~~webproject testwp2(t2) new (with all extras)~~
+- ~~webproject extend (add alias domain, app skeleton & website copy)~~
 - webproject update (change domain, update app skeleton & website copy)
-
+- webproject reset (change domain, reset app)
