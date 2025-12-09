@@ -5,7 +5,7 @@
 Usage: webproject "PROJECT_NAME" new|extend|update|reset   
 [[ --domain DOMAIN][ --application][ --copy COPY_DOMAIN]]
 ```
-| **PROJECT_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** | **Name of required or 'new' project**   |
+| **PROJECT_NAME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** | **Name of required or 'new' project** |
 | :-------------------------------- | :--------------------------------------------------------------- |
 | **new**                           | ***Generate base project skeleton*** (If no domain given infer sub-domain from PROJECT_NAME)|
 | --domain&nbsp;DOMAIN              | Use provided domain name for server setup on this project.       |
@@ -85,19 +85,17 @@ virtualhosts-from-manifest:
 ## TODO
 Setup local server for testing.
 Write multiple test scenarios based on previous state:
+
 - virtualhost-get-domain
 - virtualhost-edit
 - virtualhost TestVH1 add testvh1
 - virtualhost TestVH1 remove
 - virtualhosts-from-manifest
+- virtualhost-edit (change domain) testvh1
 - virtualhost-append-copy
 - copy-current-website
-- webproject "Test WP 1" new [new simple inferred domain]
-
-- webproject "Test WP 1" new --domain t1 [new sub-domain.${HOSTNAME}]
-- webproject "Test WP 2" new --domain project.co.uk [new with full domain]
-
-- HOSTNAME=renyard.cloud
-- webproject "Test Project Four" new --domain t4 [new t4.renyard.cloud]
-...
+- webproject testwp1 new (basic)
+- webproject testwp2(t2) new (with all extras)
+- webproject extend (with all extras)
+- webproject update (change domain, update app skeleton & website copy)
 

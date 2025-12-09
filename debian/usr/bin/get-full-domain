@@ -1,0 +1,23 @@
+#!/bin/bash -eu
+
+if [[ "$#" -lt 1 ]]; then
+  echo "Usage: get-full-domain DOMAIN";
+  exit 2;
+fi
+
+declare -r DOMAIN=${1};
+
+LAN=FALSE; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=TRUE; LAN_HOSTNAME=${HOSTNAME}; fi
+
+if [[ $DOMAIN == *.* ]]; then
+  FULL_DOMAIN=${DOMAIN,,};
+else
+  if [[ "${LAN}" == TRUE ]]; then
+    FULL_DOMAIN="${DOMAIN,,}.${LAN_HOSTNAME,,}";
+  else
+    FULL_DOMAIN="${DOMAIN,,}.${HOSTNAME,,}.lan";
+  fi
+fi
+
+echo ${FULL_DOMAIN};
+exit 0;

@@ -7,8 +7,6 @@ PROJECT_NAME=${1};
 declare -r SWITCH=${2};
 declare -r PROJECT_NAME=`echo ${PROJECT_NAME} | sed 's/"//g'`;
 
-
-LAN=FALSE; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=TRUE; LAN_HOSTNAME=${HOSTNAME}; fi
 HOST=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
 declare -r HOST="${HOST,,}";
 
@@ -25,18 +23,10 @@ case ${SWITCH} in
     if [[ "$#" -gt 2 ]]; then
       declare -r DOMAIN=${3};
     else
-      echo "  ...FAILED! DOMAIN requiered!";
+      echo -e "  ...\e[0;31mFAILED!\e[0m DOMAIN requiered!";
       exit 2;
     fi
-    if [[ $DOMAIN == *.* ]]; then
-      FULL_DOMAIN=${DOMAIN,,};
-    else
-      if [[ "${LAN}" == TRUE ]]; then
-        FULL_DOMAIN="${DOMAIN,,}.${LAN_HOSTNAME,,}";
-      else
-        FULL_DOMAIN="${DOMAIN,,}.${HOSTNAME,,}.lan";
-      fi
-    fi
+    FULL_DOMAIN=`get-full-domain ${DOMAIN}`;
 
     UPDATE_MANIFEST=true;
     if [[ "$#" -gt 3 ]]; then
@@ -45,13 +35,13 @@ case ${SWITCH} in
     fi
 
     sudo echo "SETTING UP NEW VIRTUAL HOST: ${HOST}";
-    if [[ ! -L /var/www/${DOMAIN} ]]; then
+    if [[ ! -L /var/www/${HOST} ]]; then
       echo "  ADDING symbolic links";
-      echo "    ${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/${DOMAIN}";
-      echo "    style.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/style" "/var/www/style.${DOMAIN}";
-      echo "    func.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/func" "/var/www/func.${DOMAIN}";
-      echo "    media.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/media" "/var/www/media.${DOMAIN}";
-      echo "    dev.${DOMAIN}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/dev.${DOMAIN}";
+      echo "    ${HOST}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/${HOST}";
+      echo "    style.${HOST}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/style" "/var/www/style.${HOST}";
+      echo "    func.${HOST}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/func" "/var/www/func.${HOST}";
+      echo "    media.${HOST}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www/assets/media" "/var/www/media.${HOST}";
+      echo "    dev.${HOST}"; sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/www" "/var/www/dev.${HOST}";
     fi
     if [[ ! -f /etc/apache2/sites-available/${HOST} ]]; then
       echo "  ADDING virtualhost file: '/etc/apache2/sites-available/${HOST}.conf'";
@@ -61,7 +51,7 @@ case ${SWITCH} in
     fi
     if $UPDATE_MANIFEST; then
       echo "  UPDATING MANIFEST";
-      echo "${DOMAIN} \"${PROJECT_NAME}\"" >> ${HOME}/Projects/.manifest;
+      echo "${HOST} \"${PROJECT_NAME}\"" >> ${HOME}/Projects/.manifest;
     fi
     sudo chown -R www-data:www-data /var/www/*;
     sudo a2ensite ${HOST}.conf;

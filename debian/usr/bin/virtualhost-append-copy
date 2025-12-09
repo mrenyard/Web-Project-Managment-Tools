@@ -7,11 +7,12 @@ fi
 
 declare -r HOST=${1};
 if [[ ! -f "/etc/apache2/sites-available/${HOST}.conf" ]]; then
-    echo "  ...FAILED! Unable to locate Virtual Host File: '/etc/apache2/sites-available/${HOST}'";
+    echo -e "  ...\e[0;31mFAILED!\e[0m Unable to locate Virtual Host File: '/etc/apache2/sites-available/${HOST}'";
     exit 1;
 fi
 declare -r DOMAIN=`virtualhost-get-domain ${HOST}`;
 
+echo "  APPENDING COPY VIRTUAL HOST TO: '/etc/apache2/sites-available/${HOST}.conf'";
 sudo chmod 777 /etc/apache2/sites-available/${HOST}.conf;
 sudo /bin/cat /etc/webshop/skel/vhost/copy.txt >> /etc/apache2/sites-available/${HOST}.conf;
 sudo /bin/sed -i "s/FULL_DOMAIN/${DOMAIN}/g" "/etc/apache2/sites-available/${HOST}.conf";

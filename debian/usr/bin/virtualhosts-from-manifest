@@ -9,7 +9,7 @@ fi
 export HOME;
 
 if [[ ! -f ${HOME}/Projects/.manifest ]]; then
-  echo "  ...FAILED! MANIFEST file not found!";
+  echo -e "  ...\e[0;31mFAILED!\e[0m MANIFEST file not found!";
   exit 1;
 fi
 

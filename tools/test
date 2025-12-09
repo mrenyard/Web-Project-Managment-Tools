@@ -15,11 +15,35 @@ export HOME;
 
 RESPONSE=;
 log_response () {
-  echo -e $1;
+  echo -e "$1\n";
   RESPONSE+="$1\n";
 }
 
 sudo tools/package --deploy;
+echo
+
+# CLEAN UP
+GOOD=0;
+trap clean EXIT;
+clean () {
+  echo -e "\nCLEAN UP";
+  sudo rm -f /etc/webshop/skel/application/02-userRequierments/update.flag;
+  sudo virtualhost "Test VH 1" remove || true;
+  sudo virtualhost "Test VH 2" remove || true;
+  sudo virtualhost "Test WP 1" remove || true;
+  sudo virtualhost "Test WP 2" remove || true;
+  sudo rm -rf "${HOME}/Projects/Test VH 1";
+  sudo rm -rf "${HOME}/Projects/Test VH 2";
+  sudo rm -rf "${HOME}/Projects/Test WP 1";
+  sudo rm -rf "${HOME}/Projects/Test WP 2";
+  sudo systemctl restart apache2.service;
+  if [[ ${GOOD} == 1 ]]; then
+    echo -e "\nFULL REPORT";
+    echo -e $RESPONSE;
+  else 
+    echo -e "\nTESTS \e[0;31mFAILED TO COMPLETE!\e[0m";
+  fi
+}
 
 # virtualhost-get-domain
 echo "TESTING virtualhost-get-domain";
@@ -35,16 +59,16 @@ echo "TESTING virtualhost-edit";
 echo "SETTING UP pre test";
 sudo /bin/cp /etc/webshop/skel/vhost/base.txt /etc/apache2/sites-available/testedit.conf;
 sudo virtualhost-edit testedit edit.${HOSTNAME}.lan;
-if [[ ! -z $(grep "ServerName edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf") ]]; then
-  if [[ ! -z $(grep "DocumentRoot /var/www/testedit" "/etc/apache2/sites-available/testedit.conf") ]]; then
-    if [[ ! -z $(grep "ServerName style.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf") ]]; then
-      if [[ ! -z $(grep "DocumentRoot /var/www/style.testedit" "/etc/apache2/sites-available/testedit.conf") ]]; then
-        if [[ ! -z $(grep "ServerName func.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf") ]]; then
-          if [[ ! -z $(grep "DocumentRoot /var/www/func.testedit" "/etc/apache2/sites-available/testedit.conf") ]]; then
-            if [[ ! -z $(grep "ServerName media.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf") ]]; then
-              if [[ ! -z $(grep "DocumentRoot /var/www/media.testedit" "/etc/apache2/sites-available/testedit.conf") ]]; then
-                if [[ ! -z $(grep "ServerName dev.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf") ]]; then
-                  if [[ ! -z $(grep "DocumentRoot /var/www/dev.testedit" "/etc/apache2/sites-available/testedit.conf") ]]; then
+if grep "ServerName edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf"; then
+  if grep "DocumentRoot /var/www/testedit" "/etc/apache2/sites-available/testedit.conf"; then
+    if grep "ServerName style.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf"; then
+      if grep "DocumentRoot /var/www/style.testedit" "/etc/apache2/sites-available/testedit.conf"; then
+        if grep "ServerName func.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf"; then
+          if grep "DocumentRoot /var/www/func.testedit" "/etc/apache2/sites-available/testedit.conf"; then
+            if grep "ServerName media.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf"; then
+              if grep "DocumentRoot /var/www/media.testedit" "/etc/apache2/sites-available/testedit.conf"; then
+                if grep "ServerName dev.edit\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testedit.conf"; then
+                  if grep "DocumentRoot /var/www/dev.testedit" "/etc/apache2/sites-available/testedit.conf"; then
                     log_response "virtualhost-edit Test \e[0;32mSUCCESSFULL\e[0m";
                   else
                     log_response "virtualhost-edit Test \e[0;31mFAILED!\e[0m - unable to confirm dev DocumentRoot";
@@ -90,8 +114,8 @@ if [[ -d "/var/www/testvh1" ]]; then
       if [[ -d "/var/www/media.testvh1" ]]; then
         if [[ -d "/var/www/dev.testvh1" ]]; then
           if [[ -f "/etc/apache2/sites-enabled/testvh1.conf" ]]; then
-            if [[ ! -z $(grep 'testvh1 "Test VH 1"' "${HOME}/Projects/.manifest") ]]; then
-              if [[ -z $(curl -sk --head https://testvh1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.." > /dev/null) ]]; then
+            if grep 'testvh1 "Test VH 1"' "${HOME}/Projects/.manifest"; then
+              if curl -sk --head https://testvh1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
                 log_response "virtualhost 1 add Test \e[0;32mSUCCESSFULL\e[0m";
               else
                 log_response "virtualhost 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testvh1.${HOSTNAME}.lan is live";
@@ -139,7 +163,7 @@ else
           if [[ -f "/etc/apache2/sites-available/testvh1.conf" ]]; then
               log_response "virtualhost 1 remove Test \e[0;31mFAILED!\e[0m - unable to verify absence of /etc/apache2/sites-avalible/testvh1.conf";
           else
-            if [[ ! -z $(grep 'testvh1 "Test VH 1"' "${HOME}/Projects/.manifest") ]]; then
+            if grep 'testvh1 "Test VH 1"' "${HOME}/Projects/.manifest"; then
               log_response "virtualhost 1 remove Test \e[0;31mFAILED!\e[0m - unable to confirm absence of entry in .manifest";
             else
               log_response "virtualhost 1 remove Test \e[0;32mSUCCESSFULL\e[0m";
@@ -165,14 +189,14 @@ if [[ -d "/var/www/testvh1" ]]; then
       if [[ -d "/var/www/media.testvh1" ]]; then
         if [[ -d "/var/www/dev.testvh1" ]]; then
           if [[ -f "/etc/apache2/sites-available/testvh1.conf" ]]; then
-            if [[ ! -z $(grep 'testvh1 "Test VH 1"' "${HOME}/Projects/.manifest") ]]; then
+            if grep 'testvh1 "Test VH 1"' "${HOME}/Projects/.manifest"; then
               if [[ -d "/var/www/testvh2" ]]; then
                 if [[ -d "/var/www/style.testvh2" ]]; then
                   if [[ -d "/var/www/func.testvh2" ]]; then
                     if [[ -d "/var/www/media.testvh2" ]]; then
                       if [[ -d "/var/www/dev.testvh2" ]]; then
                         if [[ -f "/etc/apache2/sites-available/testvh2.conf" ]]; then
-                          if [[ ! -z $(grep "testvh2 \"Test VH 2\"" "${HOME}/Projects/.manifest") ]]; then
+                          if grep "testvh2 \"Test VH 2\"" "${HOME}/Projects/.manifest"; then
                             log_response "virtualhosts-from-manifest Test \e[0;32mSUCCESSFULL\e[0m";
                           else
                             log_response "virtualhosts-from-manifest Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest testvh2";            
@@ -217,11 +241,11 @@ else
   log_response "virtualhosts-from-manifest Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/testvh1";
 fi
 
-# virtualhost-edit (change domain) testvh2
+# virtualhost-edit (change domain) testvh1
 echo "TESTING virtualhost-edit Rename (change domain)";
 sudo virtualhost-edit testvh1 new-domain.lan;
-if [[ ! -z $(grep "ServerName new-domain.lan" "/etc/apache2/sites-available/testvh1.conf") ]]; then
-  if [[ ! -z $(grep "DocumentRoot /var/www/testvh1" "/etc/apache2/sites-available/testvh1.conf") ]]; then
+if grep "ServerName new-domain.lan" "/etc/apache2/sites-available/testvh1.conf"; then
+  if grep "DocumentRoot /var/www/testvh1" "/etc/apache2/sites-available/testvh1.conf"; then
     log_response "virtualhost-edit Rename Test \e[0;32mSUCCESSFULL\e[0m";
   else
     log_response "virtualhost-edit Rename Test \e[0;31mFAILED!\e[0m - unable to confirm DocumentRoot";
@@ -233,8 +257,8 @@ fi
 # virtualhost-append-copy
 echo "TESTING virtualhost-append-copy";
 sudo virtualhost-append-copy testvh1;
-if [[ ! -z $(grep "ServerName copy.new-domain.lan" "/etc/apache2/sites-available/testvh1.conf") ]]; then
-  if [[ ! -z $(grep "DocumentRoot /var/www/copy.testvh1" "/etc/apache2/sites-available/testvh1.conf") ]]; then
+if grep "ServerName copy.new-domain.lan" "/etc/apache2/sites-available/testvh1.conf"; then
+  if grep "DocumentRoot /var/www/copy.testvh1" "/etc/apache2/sites-available/testvh1.conf"; then
     log_response "virtualhost-append-copy Test \e[0;32mSUCCESSFULL\e[0m";
   else
     log_response "virtualhost-append-copy Test \e[0;31mFAILED!\e[0m - unable to confirm DocumentRoot";
@@ -245,11 +269,12 @@ fi
 
 # copy-current-website
 echo "TESTING copy-current-website";
-sudo copy-current-website "Test VH 2" www.example.com;
+copy-current-website "Test VH 2" www.example.com;
+sudo systemctl restart apache2;
 if [[ -d "${HOME}/Projects/Test VH 2/copy" ]]; then
   if [[ -d "/var/www/copy.testvh2" ]]; then
-    if [[ -z $(grep "ServerName copy.thestvh2\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testvh2.conf") ]]; then
-      if [[ -z $(curl -sk --head https://copy.testvh2.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.." > /dev/null) ]]; then
+    if grep "ServerName copy.testvh2\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testvh2.conf"; then
+      if [[ ! -z $(curl -sk --head "https://copy.testvh2.${HOSTNAME}.lan/" | head -n 1 | grep "HTTP/1.[01] 200") ]]; then
         log_response "copy-current-website Test \e[0;32mSUCCESSFULL\e[0m";
       else
         log_response "copy-current-website Test \e[0;31mFAILED!\e[0m - unable to confirm site copy.testvh2.${HOSTNAME}.lan is live";
@@ -264,78 +289,165 @@ else
     log_response "copy-current-website Test \e[0;31mFAILED!\e[0m - unable to localte ${HOME}/Projects/TestVH2/copy";
 fi
 
-# webproject new
+# webproject testwp1 new (basic)
 echo "TESTING webproject new (basic)";
-sudo webproject "Test WP 1" new
+webproject "Test WP 1" new
 if [[ -d "${HOME}/Projects/Test WP 1" ]]; then
-if [[ -d "/var/www/testwp1" ]]; then
-  if [[ -d "/var/www/style.testwp1" ]]; then
-    if [[ -d "/var/www/func.testwp1" ]]; then
-      if [[ -d "/var/www/media.testwp1" ]]; then
-        if [[ -d "/var/www/dev.testwp1" ]]; then
-          if [[ -f "/etc/apache2/sites-enabled/testwp1.conf" ]]; then
-            if [[ -d "${HOME}/Projects/Test WP 1/www" ]]; then
-              if [[ ! -z $(grep 'testwp1 "Test WP 1"' "${HOME}/Projects/.manifest") ]]; then
-                if [[ -z $(curl -sk --head https://testwp1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.." > /dev/null) ]]; then
-                  log_response "webproject 1 add Test \e[0;32mSUCCESSFULL\e[0m";
+  if [[ -d "/var/www/testwp1" ]]; then
+    if [[ -d "/var/www/style.testwp1" ]]; then
+      if [[ -d "/var/www/func.testwp1" ]]; then
+        if [[ -d "/var/www/media.testwp1" ]]; then
+          if [[ -d "/var/www/dev.testwp1" ]]; then
+            if [[ -f "/etc/apache2/sites-enabled/testwp1.conf" ]]; then
+              if [[ -d "${HOME}/Projects/Test WP 1/www" ]]; then
+                if grep 'testwp1 "Test WP 1"' "${HOME}/Projects/.manifest"; then
+                  if curl -sk --head https://testwp1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
+                    log_response "webproject 1 add Test \e[0;32mSUCCESSFULL\e[0m";
+                  else
+                    log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testwp1.${HOSTNAME}.lan is live";
+                  fi
                 else
-                  log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testwp1.${HOSTNAME}.lan is live";
+                  log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest";            
                 fi
               else
-                log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest";            
+                log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 1/www'";
               fi
             else
-              log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 1/www'";
+              log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testwp1.conf";
             fi
           else
-            log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testwp1.conf";
+            log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testwp1";
           fi
         else
-          log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testwp1";
+          log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testwp1";
         fi
       else
-        log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testwp1";
+        log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testwp1";
       fi
     else
-      log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testwp1";
+      log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testwp1";
     fi
   else
-    log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testwp1";
+    log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/testwp1";
   fi
-else
-  log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/testwp1";
-fi
 else
   log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte ${HOME}/Projects/Test\ WP\ 1";
 fi
 
-# # webproject "PROJECT_NAME" new --domain DOMAIN --application --copy COPY_DOMAIN
-# echo "TESTING webproject new (with all extras)";
-# webproject "Test WP 2" new --domain t2 --application --copy www.example.com
+# webproject testwp2(t2) new (with all extras)
+echo "TESTING webproject new (with all extras)";
+webproject "Test WP 2" new --domain t2 --application --copy www.example.com
+if [[ -d "${HOME}/Projects/Test WP 2" ]]; then
+  if [[ -d "/var/www/testwp2" ]]; then
+    if [[ -d "/var/www/style.testwp2" ]]; then
+      if [[ -d "/var/www/func.testwp2" ]]; then
+        if [[ -d "/var/www/media.testwp2" ]]; then
+          if [[ -d "/var/www/dev.testwp2" ]]; then
+            if [[ -d "/var/www/copy.testwp2" ]]; then
+              if [[ -f "/etc/apache2/sites-enabled/testwp2.conf" ]]; then
+                if [[ -d "${HOME}/Projects/Test WP 2/www" ]]; then
+                  if [[ -d "${HOME}/Projects/Test WP 2/copy" ]]; then
+                    if [[ -f "${HOME}/Projects/Test WP 2/www/controller.php" ]]; then
+                      if grep 'testwp2 "Test WP 2"' "${HOME}/Projects/.manifest"; then
+                        if curl -sk --head https://t2.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
+                          log_response "webproject 2 add Test \e[0;32mSUCCESSFULL\e[0m";
+                        else
+                          log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to confirm site t2.${HOSTNAME}.lan is live";
+                        fi
+                      else
+                        log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest";            
+                      fi
+                    else
+                      log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 2/www/controller.php'";
+                    fi
+                  else
+                    log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 2/copy'";
+                  fi
+                else
+                  log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 2/www'";
+                fi
+              else
+                log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testwp2.conf";
+              fi
+            else
+              log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/copy.testwp2";
+            fi
+          else
+            log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testwp2";
+          fi
+        else
+          log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testwp2";
+        fi
+      else
+        log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testwp2";
+      fi
+    else
+      log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testwp2";
+    fi
+  else
+    log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/testwp2";
+  fi
+else
+  log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to localte ${HOME}/Projects/Test\ WP\ 2";
+fi
 
-# # webproject "PROJECT_NAME" extend --domain DOMAIN --application --copy COPY_DOMAIN
-# echo "TESTING webproject extend (with all extras)";
-# webproject "Test WP 1" extend --domain t1 --application --copy www.example.com
+# webproject "PROJECT_NAME" extend --domain DOMAIN --application --copy COPY_DOMAIN
+echo "TESTING webproject extend (with all extras)";
+webproject "Test WP 1" extend --domain t1 --application --copy www.example.com
+if [[ -d "${HOME}/Projects/Test WP 1/copy" ]]; then
+  if [[ -f "${HOME}/Projects/Test WP 1/www/controller.php" ]]; then
+    if grep 'testwp1 "Test WP 1"' "${HOME}/Projects/.manifest"; then
+      if [[ ! -z $(curl -sk --head https://t1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
+        if [[ ! -z $(curl -sk --head https://copy.testwp1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
+          log_response "webproject 1 extend Test \e[0;32mSUCCESSFULL\e[0m";
+        else
+          log_response "webproject 1 extend Test \e[0;31mFAILED!\e[0m - unable to confirm site copy.testwp1.${HOSTNAME}.lan is live";
+        fi
+      else
+          log_response "webproject 1 extend Test \e[0;31mFAILED!\e[0m - unable to confirm site t1.${HOSTNAME}.lan is live";
+      fi
+    else
+      log_response "webproject 1 extend Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest";            
+    fi
+  else
+    log_response "webproject 1 extend Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 1/www/controller.php'";
+  fi
+else
+  log_response "webproject 1 extend Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 1/copy'";
+fi
 
 # # webproject "PROJECT_NAME" update --domain new-domain.lan
-# echo "TESTING webproject update (change domain, update application skeleton)";
-# sudo echo "FLAG" >> /var/www/copy.testwp1/index.html;
-# sudo touch ${HOME}/Projects/Test\ WP\ 2/application/02-userRequierments/manual.flag;
+# echo "TESTING webproject update (change domain, update app skeleton & website copy)";
+# echo "SETTING UP pre test";
+# sudo echo "FLAG" >> /var/www/testwp2/index.html;
+# sudo touch ${HOME}/Projects/Test\ WP\ 2/02-userRequierments/manual.flag;
 # sudo touch /etc/webshop/skel/application/02-userRequierments/update.flag;
-# webproject "Test WP 2" update --domain testwp2 --application --copy t1.${HOSTNAME}.lan
+# webproject "Test WP 2" update --domain testwp2 --application --copy www.example.com
+# if grep "ServerName testwp2\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testwp2.conf"; then
+#   if grep "DocumentRoot /var/www/testwp2" "/etc/apache2/sites-available/testwp2.conf"; then
+#     if [[ -f "${HOME}/Projects/Test WP 2/www/controller.php" ]]; then
+#       if [[ -f "/var/www/testwp2/index.html" ]]; then
+#         if [[ -f "/var/www/copy.testwp2/index.html" ]]; then
+#           if [[ -f "${HOME}/Projects/Test WP 2/02-userRequierments/manual.flag" && -f "${HOME}/Projects/Test WP 2/02-userRequierments/update.flag" ]]; then
+#             log_response "webproject 2 update Test \e[0;32mSUCCESSFULL\e[0m";
+#           else
+#             log_response "webproject 2 update Test \e[0;31mFAILED!\e[0m - unable to confirm updated application skeleton";
+#           fi
+#         else
+#           log_response "webproject 2 update Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/copy.testwp2/index.html";
+#         fi
+#       else
+#         log_response "webproject 2 update Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/testwp2/index.html";
+#       fi
+#     else
+#       log_response "webproject 2 update Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 2/www/controller.php'";
+#     fi
+#   else
+#     log_response "webproject 2 update Test \e[0;31mFAILED!\e[0m - unable to confirm DocumentRoot";
+#   fi
+# else
+#   log_response "webproject 2 update Test \e[0;31mFAILED!\e[0m - unable to confirm ServerName";
+# fi
 
-# CLEAN UP
-echo "CLEAN UP";
-sudo virtualhost "Test VH 1" remove;
-sudo virtualhost "Test VH 2" remove;
-sudo virtualhost "Test WP 1" remove;
-sudo rm -rf "${HOME}/Projects/Test VH 1";
-sudo rm -rf "${HOME}/Projects/Test VH 2";
-sudo rm -rf "${HOME}/Projects/Test WP 1";
-sudo rm -rf /tmp/testvh2;
-
-sudo systemctl restart apache2.service;
-
-echo -e "\nFULL REPORT";
-echo -e $RESPONSE;
+GOOD=1;
 exit 0;

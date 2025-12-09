@@ -8,7 +8,7 @@ fi
 declare -r HOST=${1};
 declare -r NEW_DOMAIN=${2};
 if [[ ! -f "/etc/apache2/sites-available/${HOST}.conf" ]]; then
-    echo "  ...FAILED! Unable to locate Virtual Host File: '/etc/apache2/sites-available/${HOST}'";
+    echo -e "  ...\e[0;31mFAILED!\e[0m Unable to locate Virtual Host File: '/etc/apache2/sites-available/${HOST}'";
     exit 1;
 fi
 declare -r EXISTING_DOMAIN=`virtualhost-get-domain ${HOST}`;

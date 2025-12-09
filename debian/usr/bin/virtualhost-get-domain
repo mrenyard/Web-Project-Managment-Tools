@@ -8,7 +8,7 @@ fi
 declare -r HOST=${1};
 
 if [[ ! -f "/etc/apache2/sites-available/${HOST}.conf" ]]; then
-    echo "  ...FAILED! Unable to locate Virtual Host File: '/etc/apache2/sites-available/${HOST}'";
+    echo -e "  ...\e[0;31mFAILED!\e[0m Unable to locate Virtual Host File: '/etc/apache2/sites-available/${HOST}'";
     exit 1;
 fi
 declare -r PRIMARY_DOMAIN=`sed -n "2 p" /etc/apache2/sites-available/${HOST}.conf | sed -e 's/  ServerName //g' -e 's/.${HOSTNAME}//g'`;

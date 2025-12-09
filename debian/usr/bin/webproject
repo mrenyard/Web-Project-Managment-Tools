@@ -19,7 +19,7 @@ esac
 
 shift 2;
 declare DOMAIN=;
-declare APPLICATION_NAME=;
+declare APPLICATION_NAME=FALSE;
 declare COPY_DOMAIN=;
 while (( "$#" )); do
   case $1 in
@@ -50,7 +50,7 @@ case ${PROCESS_TYPE} in
     sudo echo "BUILDING: '${HOME}/Projects/${PROJECT_NAME}'";
 
     if [[ -d "${HOME}/Projects/${PROJECT_NAME}" ]]; then
-      echo "  ...FAILED! Project already exists!";
+      echo -e "  ...\e[0;31mFAILED!\e[0m Project already exists!";
       exit 3;
     fi
     /bin/mkdir -pv "${HOME}/Projects/${PROJECT_NAME}";
@@ -61,7 +61,7 @@ case ${PROCESS_TYPE} in
     fi
     virtualhost "${PROJECT_NAME}" add ${DOMAIN};
 
-    if [[ ${APPLICATION_NAME} != TRUE ]]; then
+    if [[ ${APPLICATION_NAME} == TRUE ]]; then
       echo "ADDING APPLICATION SKELETON: '${HOME}/Projects/${PROJECT_NAME}'";
       /bin/cp -dR /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
     fi
@@ -71,25 +71,25 @@ case ${PROCESS_TYPE} in
     fi
 
     echo "RELOADING WEB SERVER";
-    sudo service apache2 reload;
+    sudo systemctl reload apache2.service
     ;;
 
   "extend" )
     if [[
-      ( ${APPLICATION_NAME} = TRUE) &&
+      ( ${APPLICATION_NAME} == TRUE) &&
       (
         (-d "${HOME}/Projects/${PROJECT_NAME}/code/") ||
         (-d "${HOME}/Projects/${PROJECT_NAME}/02-userRequierments/") ||
         (-d "${HOME}/Projects/${PROJECT_NAME}/04-Systemdesign/")
       )
     ]]; then
-      echo "  ...FAILED! there are indication that a web application skeleton has already been added!";
+      echo -e "  ...\e[0;31mFAILED!\e[0m there are indication that a web application skeleton has already been added!";
       echo "  If you wish to 'update' or 'reset' the web application skeleton please use the correct command.";
       exit 4;
     fi
 
     if [[ ("${COPY_DOMAIN}" != "${NULL}") && (-d "${HOME}/Projects/${PROJECT_NAME}/copy") ]]; then
-      echo "  ...FAILED! '${HOME}/Projects/${PROJECT_NAME}/copy' already exists!";
+      echo -e "  ...\e[0;31mFAILED!\e[0m '${HOME}/Projects/${PROJECT_NAME}/copy' already exists!";
       echo "  If you wish to 'update/reset' the copy please use one of the correct commands.";
       exit 5;
     fi
@@ -97,14 +97,17 @@ case ${PROCESS_TYPE} in
     sudo echo "EXTENDING RELEVANT FEATURE(S)";
 
     if [[ "${DOMAIN}" != "${NULL}" ]]; then
-      echo "ADDING ALIAS ${DOMAIN} TO VIRTUAL HOST";
-      sudo /bin/sed "4i\  ServerAlias ${DOMAIN}" "/etc/apache2/sites-available/${HOST}" > "/tmp/${HOST}";
-      sudo /bin/mv "/tmp/${HOST}" "/etc/apache2/sites-available/${HOST}";
+      FULL_DOMAIN=`get-full-domain ${DOMAIN}`;
+      echo "ADDING ALIAS ${FULL_DOMAIN} TO VIRTUAL HOST";
+      sudo /bin/sed "3i\  ServerAlias ${FULL_DOMAIN}" "/etc/apache2/sites-available/${HOST}.conf" > "/tmp/${HOST}-part";
+      sudo /bin/sed "8i\  ServerAlias ${FULL_DOMAIN}" "/tmp/${HOST}-part" > "/tmp/${HOST}";
+      sudo /bin/mv "/tmp/${HOST}" "/etc/apache2/sites-available/${HOST}.conf";
+      sudo /bin/rm "/tmp/${HOST}-part";
     fi
 
-    if [[ ${APPLICATION_NAME} = TRUE ]]; then
+    if [[ ${APPLICATION_NAME} == TRUE ]]; then
       echo "ADDING APPLICATION SKELETON: '${HOME}/Projects/${PROJECT_NAME}'";
-      `/bin/cp -dR /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}"`;
+      `sudo /bin/cp -dR /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}"`;
     fi
 
     if [[ "${COPY_DOMAIN}" != "${NULL}" ]]; then
@@ -112,7 +115,7 @@ case ${PROCESS_TYPE} in
     fi
 
     echo "RELOADING WEB SERVER";
-    sudo a2dissite ${HOST} && sudo service apache2 reload;
+    sudo systemctl reload apache2.service
     ;;
 
   "update" )
@@ -122,15 +125,16 @@ case ${PROCESS_TYPE} in
       echo "UPDATING PRIMARY DOMAIN NAME TO: ${DOMAIN}";
       sudo virtualhost-edit ${HOST} ${DOMAIN};
       echo "RELOADING WEB SERVER";
-      sudo service apache2 reload;
+      sudo systemctl reload apache2.service
     fi
 
-    if [[ ${APPLICATION_NAME} = TRUE ]]; then
+    if [[ ${APPLICATION_NAME} == TRUE ]]; then
       echo "UPDATING APPLICATION SKELETON: '${HOME}/Projects/${PROJECT_NAME}'";
-      /bin/cp -dRuvi /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
+      sudo /bin/cp -dRuvi /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
     fi
 
     if [[ "${COPY_DOMAIN}" != "${NULL}" ]]; then
+      sudo rm -rf "${HOME}/Projects/${PROJECT_NAME}/copy";
       copy-current-website "${PROJECT_NAME}" ${COPY_DOMAIN};
     fi
     ;;
@@ -151,12 +155,13 @@ case ${PROCESS_TYPE} in
           sudo virtualhost-append-copy ${HOST} ${DOMAIN};
         fi
         echo "RELOADING WEB SERVER";
-        sudo a2ensite ${HOST} && sudo service apache2 reload
+        sudo a2ensite ${HOST}
+        sudo service apache2 reload
       fi
       echo;
     fi
 
-    if [[ ${APPLICATION_NAME} = TRUE ]]; then
+    if [[ ${APPLICATION_NAME} == TRUE ]]; then
       echo "Reseting web application skeleton '${HOME}/Projects/${PROJECT_NAME}', will REMOVE developer added files.";
       read -p "ARE YOU SURE YOU WISH TO CONTINUE WITH THIS ACTION (y/n)?" -n 1 -r
       if [[ $REPLY =~ ^[Yy]$ ]]; then
