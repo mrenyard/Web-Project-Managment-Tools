@@ -40,8 +40,8 @@ Usage: virtualhosts-from-manifest
 ### virtualhost-edit - Set or Change Virtualhost ServerName (domain).
 ```
 Usage: virtualhost-edit HOST NEW_DOMAIN
-```
 | **HOST**                | ***Virtualhost filename to be modified***                       |
+```
 | :-----------------------| :-------------------------------------------------------------- |
 | **NEW_DOMAIN**          | ***Domain to be changed or set as ServerName.***                |
 ### virtualhost-get-domain - Get Domain (ServerName) from VIRTUAL_HOST_FILE. 
@@ -95,7 +95,7 @@ virtualhosts-from-manifest:
 Setup local server for testing.
 Write multiple test scenarios based on previous state:
 
-- get-full-domain
+- ~~get-full-domain~~
 - ~~virtualhost-get-domain~~
 - ~~virtualhost-edit~~
 - ~~virtualhost TestVH1 add testvh1~~
@@ -107,5 +107,6 @@ Write multiple test scenarios based on previous state:
 - ~~webproject testwp1 new (basic)~~
 - ~~webproject testwp2(t2) new (with all extras)~~
 - ~~webproject extend (add alias domain, app skeleton & website copy)~~
-- webproject update (change domain, update app skeleton & website copy)
+- ~~webproject update (change domain, update app skeleton & website copy)~~
 - webproject reset (change domain, reset app)
+

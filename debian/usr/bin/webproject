@@ -122,8 +122,9 @@ case ${PROCESS_TYPE} in
     sudo echo "UPDATING RELEVANT FEATURE(S)";
 
     if [[ "${DOMAIN}" != "${NULL}" ]]; then
-      echo "UPDATING PRIMARY DOMAIN NAME TO: ${DOMAIN}";
-      sudo virtualhost-edit ${HOST} ${DOMAIN};
+      FULL_DOMAIN=`get-full-domain ${DOMAIN}`;
+      echo "UPDATING PRIMARY DOMAIN NAME TO: ${FULL_DOMAIN}";
+      sudo virtualhost-edit ${HOST} ${FULL_DOMAIN};
       echo "RELOADING WEB SERVER";
       sudo systemctl reload apache2.service
     fi
