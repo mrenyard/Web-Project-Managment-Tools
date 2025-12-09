@@ -41,33 +41,28 @@ Usage: virtualhosts-from-manifest
 ```
 Usage: virtualhost-edit HOST NEW_DOMAIN
 ```
-| :-----------------------| :-------------------------------------------------------------- |
 | **HOST**                | Virtualhost filename to be modified                             |
 | **NEW_DOMAIN**          | Domain to be changed or set as ServerName.                      |
 ### virtualhost-get-domain - Get Domain (ServerName) from VIRTUAL_HOST_FILE. 
 ```
 Usage: virtualhost-get-domain HOST
 ```
-| :-----------------------| :-------------------------------------------------------------- |
 | **HOST**                | Virtualhost filename to get domain (ServerName) from.           |
 ### copy-current-website - Make Copy existing Site Under 'copy' sub-domain. 
 ```
 Usage: copy-current-website "PROJECT_NAME" COPY_DOMAIN
 ```
-| :-----------------------| :--------------------------------------------------------------------- |
 | **PROJECT_NAME**        | Name of target project to make a static copy of current website under. |
 | **COPY_DOMAIN**         | Domain of of current website to make a static copy of.                 |
 ### virtualhost-append-copy - Add virtualhost sub-domain 'copy.'.
 ```
 Usage: virtualhost-append-copy HOST
 ```
-| :-----------------------| :------------------------------------------------------------- |
 | **HOST**                | Virtualhost filename to append 'copy' sub-domain on.           |
 ### get-full-domain - Checks local subdomain structure to determine full domain.
 ```
 Usage: get-full-domain DOMAIN
 ```
-| :-----------------------| :------------------------------------------------------------- |
 | **DOMAIN**              | Sub-/domain to be modified and or qualified as FULL_DOMAIN.    |
 ##Dependency Tree
 ```
