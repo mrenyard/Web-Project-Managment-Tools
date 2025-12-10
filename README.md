@@ -40,6 +40,7 @@ Usage: virtualhosts-from-manifest
 ### virtualhost-edit - Set or Change Virtualhost ServerName (domain).
 ```
 Usage: virtualhost-edit HOST NEW_DOMAIN
+```
 | **HOST**                | ***Virtualhost filename to be modified***                       |
 | :-----------------------| :-------------------------------------------------------------- |
 | **NEW_DOMAIN**          | ***Domain to be changed or set as ServerName.***                |
