@@ -11,11 +11,11 @@ HOST=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/\//-/g'`;
 declare -r HOST="${HOST,,}";
 
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
-if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
-  echo "${HOME} IS AN INVALID HOME PATH!";
-  read -p "Enter username: " USERNAME;
+while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
+  echo "USER HOME PATH ${HOME} IS INVALID!";
+  read -p "Enter username: " USERNAME
   HOME=`echo "/home/${USERNAME}"`;
-fi
+done
 export HOME;
 
 case ${SWITCH} in

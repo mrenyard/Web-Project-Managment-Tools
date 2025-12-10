@@ -6,11 +6,11 @@ if [[ "$0" != "tools/test" ]]; then
 fi
 
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
-if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
-  echo "${HOME} IS AN INVALID HOME PATH!";
+while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
+  echo "USER HOME PATH ${HOME} IS INVALID!";
   read -p "Enter username: " USERNAME
   HOME=`echo "/home/${USERNAME}"`;
-fi
+done
 export HOME;
 
 RESPONSE=;
