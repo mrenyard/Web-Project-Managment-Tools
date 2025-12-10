@@ -12,9 +12,9 @@
   Names (& URL): 
 
 /* SITE */
-  Standards: HTML5, CSS3
-  Components: Modernizr, jQuery
-  Software: Svelte
+  Standards: HTML5, CSS3, JavaScript, PHP, MySQL
+  Components: RAMP.js
+  Software: RAMP
 ________________________________________________
 _______________JJJJJJJJ_________________________
 _______________JJJJJJJJJJ_______________________

@@ -15,8 +15,6 @@ fi
 if [ ! -f ${HOME}/Projects/.manifest ]; then
   echo "...ADDING ${HOME}/Projects/.manifest file"
   touch ${HOME}/Projects/.manifest;
-  #sudo chmod 755 postinst;
-  #sudo chown ${USER}:${USER} postinst;
 fi
 declare DOMAIN=${HOSTNAME}.lan
 #virtualhosts-from-manifest;

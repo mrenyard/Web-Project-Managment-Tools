@@ -1,49 +1,32 @@
-    <script async defer  type="text/javascript">
-
-var svelte = window.svelte || {};
-
-// Create Element.remove() function if not exist
-if (!('remove' in Element.prototype)) {
-  Element.prototype.remove = function () {
-    if (this.parentNode) {
-      this.parentNode.removeChild(this);
-    }
-  };
-}
-
-svelte.script = function ()
-{
-   // Method for script loading (private)
-  var _load = function (url, requires) {
-    if (requires) {
-      for (var i = 0, j = requires.length; i < j; i++) {
-        if (!window.svelte[requires[i]]) {
-          setTimeout(function () {
-            _load(url, requires);
-          }, 50);
-          return;
-        }
-      }
-    }
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
-  };
-
-  return {
-    load: function (url, required) { _load(url, required); }
-  };
-}();
-
-svelte.script.load('/assets/func/svelte.state.js');
-svelte.script.load('/assets/func/svelte.lightbox.js');
-svelte.script.load('/assets/func/svelte.internal.js');
-svelte.script.load('/assets/func/svelte.accordion.js');
-svelte.script.load('/assets/func/svelte.navigation.js', ['state']);
-svelte.script.load('/assets/func/svelte.navigation-sliders.js', ['navigation']);
-svelte.script.load('/assets/func/svelte.maps.js', ['script']);
-svelte.script.load('/assets/func/svelte.hijax.js', ['lightbox']);
-svelte.script.load('/assets/func/svelte.forms.js', ['hijax']);
-
+<?php
+/**
+ * RAMP - Rapid web application development environment for building flexible, customisable web systems.
+ *
+ * This program is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+ * 
+ * @author Matt Renyard (renyard.m@gmail.com)
+ * @package RAMP
+ * @version 0.0.9;
+ */
+if (\ramp\SETTING::$DEV_MODE) { ?>
+<!-- scripts.php -->
+    <script src="/assets/func/init-full.js"></script>
+    <script>
+FUNC.modsPath = '/assets/func/mods/full/';
+<?php } else { ?>
+    <script src="//func.<?=\ramp\SETTING::$RAMP_DOMAIN; ?>/init.js"></script>
+    <script>
+<?php } ?>
+FUNC.init.register('#<?=str_replace('.', '-', \ramp\SETTING::$RAMP_DOMAIN) ?>', 'site', ['dom','event']);
+FUNC.init.run();
     </script>
