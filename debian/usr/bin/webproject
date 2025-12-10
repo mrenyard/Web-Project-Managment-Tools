@@ -145,29 +145,42 @@ case ${PROCESS_TYPE} in
 
     if [[ "${DOMAIN}" != "${NULL}" ]]; then
       echo "Reseting the primary domain name for '${PROJECT_NAME}' will DELETE all aliases.";
-      read -p "ARE YOU SURE YOU WISH TO CONTINUE WITH THIS ACTION (y/n)?" -n 1 -r
+      read -p "ARE YOU SURE YOU WISH TO CONTINUE WITH THIS ACTION (y/n)? " -n 1 -r
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo " ...RESETTING PRIMARY DOMAIN NAME.";
-        sudo virtualhost ${PROJECT_NAME} remove;
-        sudo virtualhost ${PROJECT_NAME} add ${DOMAIN};
+        echo -e "\n ...RESETTING PRIMARY DOMAIN NAME.";
+        sudo virtualhost "${PROJECT_NAME}" remove;
+        sudo virtualhost "${PROJECT_NAME}" add ${DOMAIN};
         if [[ -d "${HOME}/Projects/${PROJECT_NAME}/copy" ]]; then
-          echo "ADDING SUB DOMAIN: copy.${DOMAIN}";
-          sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/copy" "/var/www/copy.${DOMAIN}";
-          sudo virtualhost-append-copy ${HOST} ${DOMAIN};
+          sudo /bin/ln -s "${HOME}/Projects/${PROJECT_NAME}/copy" "/var/www/copy.${HOST}";
+          sudo virtualhost-append-copy ${HOST};
         fi
         echo "RELOADING WEB SERVER";
-        sudo a2ensite ${HOST}
-        sudo service apache2 reload
+        sudo service apache2 reload;
+        else
+          echo -e "\n ...SKIPPING PRIMARY DOMAIN NAME RESET.";
       fi
       echo;
     fi
 
     if [[ ${APPLICATION_NAME} == TRUE ]]; then
       echo "Reseting web application skeleton '${HOME}/Projects/${PROJECT_NAME}', will REMOVE developer added files.";
-      read -p "ARE YOU SURE YOU WISH TO CONTINUE WITH THIS ACTION (y/n)?" -n 1 -r
+      read -p "ARE YOU SURE YOU WISH TO CONTINUE WITH THIS ACTION (y/n)? " -n 1 -r
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo " ...RESETTING WEB APPLICATION SKELETON.";
-        /bin/cp -dRvfi /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
+        echo -e "\n ...RESETTING WEB APPLICATION SKELETON.";
+        rm -f "${HOME}/Projects/${PROJECT_NAME}/www/controller.php";
+        rm -f "${HOME}/Projects/${PROJECT_NAME}/www/load.ini.php";
+        rm -f "${HOME}/Projects/${PROJECT_NAME}/www/make.scratch";
+        rm -fr "${HOME}/Projects/${PROJECT_NAME}/local/ramp/";
+        rm -fr "${HOME}/Projects/${PROJECT_NAME}/make/";
+        if [ -f "${HOME}/Projects/${PROJECT_NAME}/ramp.ini" ]; then
+          read -p "  ...Do you also wish to reset your local (ramp.ini) configuration (y/n)? " -n 1 -r
+          if [[ $REPLY =~ ^[Yy]$ ]]; then
+            rm -f "${HOME}/Projects/${PROJECT_NAME}/ramp.ini";
+          fi
+        fi
+        /bin/cp -dRf /etc/webshop/skel/application/* "${HOME}/Projects/${PROJECT_NAME}";
+        else
+          echo -e "\n ...SKIPPING WEB APPLICATION SKELETON RESET.";
       fi
       echo;
     fi

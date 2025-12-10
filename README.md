@@ -41,7 +41,6 @@ Usage: virtualhosts-from-manifest
 ```
 Usage: virtualhost-edit HOST NEW_DOMAIN
 | **HOST**                | ***Virtualhost filename to be modified***                       |
-```
 | :-----------------------| :-------------------------------------------------------------- |
 | **NEW_DOMAIN**          | ***Domain to be changed or set as ServerName.***                |
 ### virtualhost-get-domain - Get Domain (ServerName) from VIRTUAL_HOST_FILE. 
@@ -108,5 +107,5 @@ Write multiple test scenarios based on previous state:
 - ~~webproject testwp2(t2) new (with all extras)~~
 - ~~webproject extend (add alias domain, app skeleton & website copy)~~
 - ~~webproject update (change domain, update app skeleton & website copy)~~
-- webproject reset (change domain, reset app)
+- ~~webproject reset (change domain, reset app)~~
 

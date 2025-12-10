@@ -442,7 +442,7 @@ sudo touch ${HOME}/Projects/Test\ WP\ 2/copy/temp.flag;
 webproject "Test WP 2" update --domain testwp2 --application --copy www.example.com
 if grep "ServerName testwp2\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testwp2.conf"; then
   if grep "DocumentRoot /var/www/testwp2" "/etc/apache2/sites-available/testwp2.conf"; then
-    if [[ -f "${HOME}/Projects/Test WP 2/www/controller.php" ]]; then
+    if [ -f "${HOME}/Projects/Test WP 2/www/controller.php" ]; then
       if [ `grep "FLAG" "/var/www/testwp2/index.html"` == "FLAG" ]; then
         if [[ -f "/var/www/copy.testwp2/index.html" ]]; then
           if [[ -f "${HOME}/Projects/Test WP 2/02-userRequierments/manual.flag" && -f "${HOME}/Projects/Test WP 2/02-userRequierments/update.flag" ]]; then
@@ -466,8 +466,40 @@ else
   log_response "webproject 2 update Test \e[0;31mFAILED!\e[0m - unable to confirm ServerName";
 fi
 
-# # webproject reset (change domain, reset app)
-# echo "TESTING webproject reset (change domain, reset app skeleton & website copy)";
+# webproject reset (change domain, reset app)
+echo "TESTING webproject reset (change domain, reset app skeleton & website copy)";
+echo "SETTING UP pre test";
+sudo cp ${HOME}/Projects/Test\ WP\ 2/ramp.ini.example ${HOME}/Projects/Test\ WP\ 2/ramp.ini;
+webproject "Test WP 2" reset --domain t2 --application --copy www.example.com
+if grep "ServerName t2\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testwp2.conf"; then
+  if grep "DocumentRoot /var/www/testwp2" "/etc/apache2/sites-available/testwp2.conf"; then
+    if [ -f "${HOME}/Projects/Test WP 2/www/controller.php" ]; then
+      if [[ -f "/var/www/copy.testwp2/index.html" ]]; then
+        if [[ ! -f "${HOME}/Projects/Test WP 2/ramp.ini" ]]; then
+          if [[ ! -z $(curl -sk --head https://t2.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
+            if [[ ! -z $(curl -sk --head https://copy.t2.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
+              log_response "webproject 2 reset Test \e[0;32mSUCCESSFULL\e[0m";
+            else
+              log_response "webproject 2 reset Test \e[0;31mFAILED!\e[0m - unable to confirm site copy.t2.${HOSTNAME}.lan is live";
+            fi
+          else
+            log_response "webproject 1 extend Test \e[0;31mFAILED!\e[0m - unable to confirm site t1.${HOSTNAME}.lan is live";
+          fi
+        else
+          log_response "webproject 2 reset Test \e[0;31mFAILED!\e[0m - unable to confirm ramp.ini removed";
+        fi
+      else
+        log_response "webproject 2 reset Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/copy.t2/index.html";
+      fi
+    else
+      log_response "webproject 2 reset Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 2/www/controller.php'";
+    fi
+  else
+    log_response "webproject 2 reset Test \e[0;31mFAILED!\e[0m - unable to confirm DocumentRoot";
+  fi
+else
+  log_response "webproject 2 reset Test \e[0;31mFAILED!\e[0m - unable to confirm ServerName";
+fi
 
 GOOD=1;
 exit 0;
