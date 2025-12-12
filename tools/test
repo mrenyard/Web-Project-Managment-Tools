@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-if [[ "$0" != "tools/test" ]]; then
+if [[ "$0" != "tools/test" && "$0" != "./tools/test" ]]; then
   echo "Must be run from parent project containing directory NOT $0";
   exit 1;
 fi

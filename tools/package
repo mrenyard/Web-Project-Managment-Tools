@@ -14,7 +14,7 @@ case ${PROCESS_TYPE} in
   "--deploy") ;&
   "--purge") ;&
   "--build")
-    if [ "$0" != "tools/package" ]; then
+    if [[ "$0" != "tools/package" && "$0" != "./tools/package" ]]; then
       echo "Must be run from parent project containing directory NOT $0";
       exit 1;
     fi

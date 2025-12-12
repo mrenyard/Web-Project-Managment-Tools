@@ -7,12 +7,12 @@ fi
 
 declare -r DOMAIN=${1};
 
-LAN=FALSE; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=TRUE; LAN_HOSTNAME=${HOSTNAME}; fi
+LAN=false; LAN_HOSTNAME=; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=true; LAN_HOSTNAME=${HOSTNAME}; fi
 
 if [[ $DOMAIN == *.* ]]; then
   FULL_DOMAIN=${DOMAIN,,};
 else
-  if [[ "${LAN}" == TRUE ]]; then
+  if [[ "${LAN}" == true ]]; then
     FULL_DOMAIN="${DOMAIN,,}.${LAN_HOSTNAME,,}";
   else
     FULL_DOMAIN="${DOMAIN,,}.${HOSTNAME,,}.lan";
