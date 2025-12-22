@@ -16,5 +16,7 @@ if [ ! -f ${HOME}/Projects/.manifest ]; then
   echo "...ADDING ${HOME}/Projects/.manifest file"
   touch ${HOME}/Projects/.manifest;
 fi
+sudo chown -R ${USER}:${USER} ${HOME}/Projects;
+
 declare DOMAIN=${HOSTNAME}.lan
-#virtualhosts-from-manifest;
+virtualhosts-from-manifest;
