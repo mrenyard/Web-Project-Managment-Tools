@@ -107,7 +107,22 @@ while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
 done
 LAN=false; LAN_HOSTNAME="${HOSTNAME,,}.lan"; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=true; LAN_HOSTNAME=${HOSTNAME}; fi
 
-buildApache2WebShopConf () {
+buildWebprojectTools () {
+	echo -e "\nINSTALLing Web Project Management Tools for WebShop...";
+	sudo apt install httrack mmv -y;
+	VERSION=`curl -sk --head https://github.com/mrenyard/Web-Project-Managment-Tools/releases/latest/ | grep -o "location: https://github.com/mrenyard/Web-Project-Managment-Tools/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"`;
+	wget https://github.com/mrenyard/Web-Project-Managment-Tools/releases/download/v${VERSION}/webproject-tools_${VERSION}-0_all.deb;
+	sudo chmod 644 webproject-tools_${VERSION}-0_all.deb;
+	sudo chown ${USER}:${USER} webproject-tools_${VERSION}-0_all.deb;
+	sudo dpkg -i webproject-tools_${VERSION}-0_all.deb;
+	sudo rm webproject-tools_${VERSION}-0_all.deb;
+	echo "  Web Project Management Tools for WebShop INSTALLED...";
+}
+
+if test -x "$(which webstart)" && curl -sk --head https://misc.${LAN_HOSTNAME}/info.php | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
+  buildWebprojectTools;
+else
+  echo "Web Project Management Tools require Apache2 WebShop Configuration (LAMP)...";
   echo -e "\nINSTALLing Apache2 WebShop Configuration (LAMP)...";
   sudo apt install openssl postfix apache2 -y;
   sudo ufw allow "Apache Full";
@@ -128,21 +143,8 @@ buildApache2WebShopConf () {
   sudo webstart;
   sudo rm apache2-webshop-conf_${VERSION}-0_all.deb;
   echo "  Apache2 WebShop Configuration (LAMP) INSTALLED...";
-}
-
-if test -x "$(which webstart)" && curl -sk --head https://misc.${LAN_HOSTNAME}/info.php | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
-    echo "Web Project Management Tools require Apache2 WebShop Configuration (LAMP)...";
-    buildApache2WebShopConf;
+  buildWebprojectTools;
 fi
-echo -e "\nINSTALLing Web Project Management Tools for WebShop...";
-sudo apt install httrack mmv -y;
-VERSION=`curl -sk --head https://github.com/mrenyard/Web-Project-Managment-Tools/releases/latest/ | grep -o "location: https://github.com/mrenyard/Web-Project-Managment-Tools/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"`;
-wget https://github.com/mrenyard/Web-Project-Managment-Tools/releases/download/v${VERSION}/webproject-tools_${VERSION}-0_all.deb;
-sudo chmod 644 webproject-tools_${VERSION}-0_all.deb;
-sudo chown ${USER}:${USER} webproject-tools_${VERSION}-0_all.deb;
-sudo dpkg -i webproject-tools_${VERSION}-0_all.deb;
-sudo rm webproject-tools_${VERSION}-0_all.deb;
-echo "  Web Project Management Tools for WebShop INSTALLED...";
 ```
 Change permisions to make sure it is executable:
 ```console 
