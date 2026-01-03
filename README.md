@@ -91,22 +91,64 @@ virtualhosts-from-manifest:
             virtualhost-get-domain: HOST
         virtualhost-get-domain: HOST
 ```
-## TODO
-Setup local server for testing.
-Write multiple test scenarios based on previous state:
+## Initialisation and Installation Script
 
-- ~~get-full-domain~~
-- ~~virtualhost-get-domain~~
-- ~~virtualhost-edit~~
-- ~~virtualhost TestVH1 add testvh1~~
-- ~~virtualhost TestVH1 remove~~
-- ~~virtualhosts-from-manifest~~
-- ~~virtualhost-edit (change domain) testvh1~~
-- ~~virtualhost-append-copy~~
-- ~~copy-current-website~~
-- ~~webproject testwp1 new (basic)~~
-- ~~webproject testwp2(t2) new (with all extras)~~
-- ~~webproject extend (add alias domain, app skeleton & website copy)~~
-- ~~webproject update (change domain, update app skeleton & website copy)~~
-- ~~webproject reset (change domain, reset app)~~
+Copy the below into a file on your Debian based Linux Server (init.sh):
 
+```console
+#!/bin/bash -eu
+
+if [[ $EUID -ne 0 ]]; then echo "This script must be run as root" 1>&2; exit 1; fi
+if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
+  echo "USER HOME PATH ${HOME} IS INVALID!";
+  read -p "Enter username: " USERNAME
+  HOME=`echo "/home/${USERNAME}"`;
+done
+LAN=false; LAN_HOSTNAME="${HOSTNAME,,}.lan"; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=true; LAN_HOSTNAME=${HOSTNAME}; fi
+
+buildApache2WebShopConf () {
+  echo -e "\nINSTALLing Apache2 WebShop Configuration (LAMP)...";
+  sudo apt install openssl postfix apache2 -y;
+  sudo ufw allow "Apache Full";
+  sudo ufw enable;
+  sudo apt install mysql-server -y;
+  sudo apt install php libapache2-mod-php php-mysql php-xdebug -y;
+  VERSION=`curl -sk --head https://github.com/mrenyard/Apache2-WebShop-Configuration/releases/latest/ | grep -o "location: https://github.com/mrenyard/Apache2-WebShop-Configuration/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"`;
+  wget https://github.com/mrenyard/Apache2-WebShop-Configuration/releases/download/v${VERSION}/apache2-webshop-conf_${VERSION}-0_all.deb
+  sudo chmod 644 apache2-webshop-conf_${VERSION}-0_all.deb;
+  sudo chown ${USER}:${USER} apache2-webshop-conf_${VERSION}-0_all.deb;
+  sudo dpkg -i apache2-webshop-conf_${VERSION}-0_all.deb;
+  if [ -d /etc/apache2/ssl ]; then sudo rm -rf /etc/apache2/ssl; fi;
+  sudo mkdir /etc/apache2/ssl;
+  echo "CREATING SELF-SIGNED SSL CERTIFICATE; USE ${LAN_HOSTNAME} as FDQN";
+  sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt;
+  sudo chown root:ssl-cert /etc/apache2/ssl/*;
+  sudo chmod 710 /etc/apache2/ssl/*;
+  sudo webstart;
+  sudo rm apache2-webshop-conf_${VERSION}-0_all.deb;
+  echo "  Apache2 WebShop Configuration (LAMP) INSTALLED...";
+}
+
+if test -x "$(which webstart)" && curl -sk --head https://misc.${LAN_HOSTNAME}/info.php | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
+    echo "Web Project Management Tools require Apache2 WebShop Configuration (LAMP)...";
+    buildApache2WebShopConf;
+fi
+echo -e "\nINSTALLing Web Project Management Tools for WebShop...";
+sudo apt install httrack mmv -y;
+VERSION=`curl -sk --head https://github.com/mrenyard/Web-Project-Managment-Tools/releases/latest/ | grep -o "location: https://github.com/mrenyard/Web-Project-Managment-Tools/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"`;
+wget https://github.com/mrenyard/Web-Project-Managment-Tools/releases/download/v${VERSION}/webproject-tools_${VERSION}-0_all.deb;
+sudo chmod 644 webproject-tools_${VERSION}-0_all.deb;
+sudo chown ${USER}:${USER} webproject-tools_${VERSION}-0_all.deb;
+sudo dpkg -i webproject-tools_${VERSION}-0_all.deb;
+sudo rm webproject-tools_${VERSION}-0_all.deb;
+echo "  Web Project Management Tools for WebShop INSTALLED...";
+```
+Change permisions to make sure it is executable:
+```console 
+sudo chmod 775 init.sh
+```
+and RUN:
+```console
+sudo ./init.sh
+```
