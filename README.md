@@ -107,6 +107,8 @@ while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
 done
 LAN=false; LAN_HOSTNAME="${HOSTNAME,,}.lan"; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=true; LAN_HOSTNAME=${HOSTNAME}; fi
 
+sudo apt install curl
+
 buildWebprojectTools () {
 	echo -e "\nINSTALLing Web Project Management Tools for WebShop...";
 	sudo apt install httrack mmv -y;
@@ -145,6 +147,7 @@ else
   echo "  Apache2 WebShop Configuration (LAMP) INSTALLED...";
   buildWebprojectTools;
 fi
+exit 0:
 ```
 Change permisions to make sure it is executable:
 ```console 
