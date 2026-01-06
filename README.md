@@ -102,8 +102,8 @@ if [[ $EUID -ne 0 ]]; then echo "This script must be run as root" 1>&2; exit 1; 
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
   echo "USER HOME PATH ${HOME} IS INVALID!";
-  read -p "Enter username: " USERNAME
-  HOME=`echo "/home/${USERNAME}"`;
+  read -p "Enter username: " USER
+  HOME=`echo "/home/${USER}"`;
 done
 LAN=false; LAN_HOSTNAME="${HOSTNAME,,}.lan"; if [[ "${HOSTNAME}" == *.lan ]]; then LAN=true; LAN_HOSTNAME=${HOSTNAME}; fi
 
@@ -126,6 +126,7 @@ if test -x "$(which webstart)" && curl -sk --head https://misc.${LAN_HOSTNAME}/i
 else
   echo "Web Project Management Tools require Apache2 WebShop Configuration (LAMP)...";
   echo -e "\nINSTALLing Apache2 WebShop Configuration (LAMP)...";
+  sudo apt update;
   sudo apt install openssl postfix apache2 -y;
   sudo ufw allow "Apache Full";
   sudo ufw enable;
@@ -138,11 +139,13 @@ else
   sudo dpkg -i apache2-webshop-conf_${VERSION}-0_all.deb;
   if [ -d /etc/apache2/ssl ]; then sudo rm -rf /etc/apache2/ssl; fi;
   sudo mkdir /etc/apache2/ssl;
-  echo "CREATING SELF-SIGNED SSL CERTIFICATE; USE ${LAN_HOSTNAME} as FDQN";
+  echo "CREATING SELF-SIGNED SSL CERTIFICATE; USE ${HOSTNAME}.lan as FDQN";
   sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt;
   sudo chown root:ssl-cert /etc/apache2/ssl/*;
   sudo chmod 710 /etc/apache2/ssl/*;
-  sudo webstart;
+  sudo systemctl start apache2.service;
+  sudo systemctl start mysql.service;
+  sudo systemctl start postfix.service;
   sudo rm apache2-webshop-conf_${VERSION}-0_all.deb;
   echo "  Apache2 WebShop Configuration (LAMP) INSTALLED...";
   buildWebprojectTools;
