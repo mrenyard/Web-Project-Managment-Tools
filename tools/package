@@ -22,8 +22,12 @@ case ${PROCESS_TYPE} in
        echo "This script must be run as root" 1>&2;
        exit 1;
     fi
-    read -p "Save package as location/name_version-release_architecture.deb [../webproject-tools_0.1-0_all.deb]: " SAVE_AS;
-    SAVE_AS=${SAVE_AS:-"../webproject-tools_0.1-0_all.deb"};
+    read -p "Confirm package details in '../debian/DEBIAN/control':";
+    nano ../debian/DEBIAN/control;
+    VERSION=$(grep -m1 'Version:' ../debian/DEBIAN/control | awk '{print $2}');
+    ARCHITECTURE=$(grep -m1 'Architecture:' ../debian/DEBIAN/control | awk '{print $2}');
+    read -p "Save package as location/name_version-release_architecture.deb [../webproject-tools_${VERSION}-0_${ARCHITECTURE}.deb]: " SAVE_AS;
+    SAVE_AS=${SAVE_AS:-"../webproject-tools_${VERSION}-0_${ARCHITECTURE}.deb"};
   case ${PROCESS_TYPE} in
     "--deploy") ;&
     "--purge") ;&
