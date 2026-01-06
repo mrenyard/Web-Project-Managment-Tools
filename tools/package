@@ -46,7 +46,7 @@ case ${PROCESS_TYPE} in
       echo "renaming '../debian.deb' to '${SAVE_AS}'";
       mv ../debian.deb ${SAVE_AS};
       sudo chmod 775 ${SAVE_AS};
-      sudo chown ${USER}:developer ${SAVE_AS};
+      sudo chown ${USER}:${USER} ${SAVE_AS};
       sudo chown -R ${USER}:${USER} ../debian;
       echo "BUILD SUCCESSFULLY COMPLETED!";
       ;;

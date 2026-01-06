@@ -147,7 +147,7 @@ else
   echo "  Apache2 WebShop Configuration (LAMP) INSTALLED...";
   buildWebprojectTools;
 fi
-exit 0:
+exit 0;
 ```
 Change permisions to make sure it is executable:
 ```console 
