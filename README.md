@@ -98,16 +98,16 @@ You will want to have installed [Apache2-WebShop-Configuration](https://github.c
 
 Download the .deb package to the local directory of your Debian based server (Ubuntu, Linux Mint, MX Linux, Zorin OS, Kali Linux ).
 ```console
-	VERSION=`curl -sk --head https://github.com/mrenyard/Web-Project-Managment-Tools/releases/latest/ | grep -o "location: https://github.com/mrenyard/Web-Project-Managment-Tools/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"` &&
-	wget https://github.com/mrenyard/Web-Project-Managment-Tools/releases/download/v${VERSION}/webproject-tools_${VERSION}-0_all.deb;
+VERSION=`curl -sk --head https://github.com/mrenyard/Web-Project-Managment-Tools/releases/latest/ | grep -o "location: https://github.com/mrenyard/Web-Project-Managment-Tools/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"` &&
+wget https://github.com/mrenyard/Web-Project-Managment-Tools/releases/download/v${VERSION}/webproject-tools_${VERSION}-0_all.deb;
 ```
-Make sure that it is exacutable
+<!-- Make sure that it is exacutable
 ```console
-	sudo chmod 644 webproject-tools_${VERSION}-0_all.deb &&	sudo chown ${USER}:${USER} webproject-tools_${VERSION}-0_all.deb;
-```
+sudo chmod 644 webproject-tools_${VERSION}-0_all.deb &&	sudo chown ${USER}:${USER} webproject-tools_${VERSION}-0_all.deb;
+``` -->
 Install the .deb packeage using `dpkg`
 ```console
-	sudo dpkg -i webproject-tools_${VERSION}-0_all.deb;
+sudo dpkg -i webproject-tools_${VERSION}-0_all.deb;
 ```
 Web-Project-Managment-Tools should now be installed verify by running `webprojects` without any parameters to see the `USAGE:` statement.
 ```console
