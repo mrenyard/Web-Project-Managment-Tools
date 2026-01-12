@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-if [[ "$#" -lt 2 ]]; then
+if [ "$#" -lt 2 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
   echo "Usage: virtualhost-edit HOST NEW_DOMAIN";
   exit 1;
 fi

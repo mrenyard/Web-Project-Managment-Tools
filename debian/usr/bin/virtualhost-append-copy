@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-if [[ "$#" -lt 1 ]]; then
+if [ "$#" -lt 1 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
   echo "Usage: virtualhost-append-copy HOST";
   exit 1;
 fi

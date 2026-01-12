@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-if [[ "$#" -lt 2 ]]; then
+if [ "$#" -lt 2 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
   echo "Usage: copy-current-website \"PROJECT_NAME\" COPY_DOMAIN";
   exit 2;
 fi
@@ -16,8 +16,8 @@ declare -r DOMAIN=`echo ${FULL_DOMAIN} | sed -e "s/.tld//g" -e "s/.${HOSTNAME}.l
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 if [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" ]]; then
   echo "${HOME} IS AN INVALID HOME PATH!";
-  read -p "Enter username: " USERNAME;
-  HOME=`echo "/home/${USERNAME}"`;
+  read -p "Enter username: " USER;
+  HOME=`echo "/home/${USER}"`;
 fi
 export HOME;
 

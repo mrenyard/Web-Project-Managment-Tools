@@ -3,10 +3,10 @@
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
   echo "USER HOME PATH ${HOME} IS INVALID!";
-  read -p "Enter username: " USERNAME
-  HOME=`echo "/home/${USERNAME}"`;
+  read -p "Enter username: " USER
+  HOME=`echo "/home/${USER}"`;
 done
-export HOME;
+export HOME USER;
 
 SCRIPT=`readlink -f $0`; SCRIPTPATH=`dirname "$SCRIPT"`; cd "$SCRIPTPATH";
 PROCESS_TYPE=; if [ "$#" -eq 0 ]; then PROCESS_TYPE="--build"; else PROCESS_TYPE=${1}; fi
@@ -22,8 +22,10 @@ case ${PROCESS_TYPE} in
        echo "This script must be run as root" 1>&2;
        exit 1;
     fi
-    read -p "Confirm package details in '../debian/DEBIAN/control':";
-    nano ../debian/DEBIAN/control;
+    if [ "$1" == "--build" ]; then
+      read -p "Confirm package details in '../debian/DEBIAN/control':";
+      nano ../debian/DEBIAN/control;
+    fi
     VERSION=$(grep -m1 'Version:' ../debian/DEBIAN/control | awk '{print $2}');
     ARCHITECTURE=$(grep -m1 'Architecture:' ../debian/DEBIAN/control | awk '{print $2}');
     read -p "Save package as location/name_version-release_architecture.deb [../webproject-tools_${VERSION}-0_${ARCHITECTURE}.deb]: " SAVE_AS;
@@ -33,21 +35,41 @@ case ${PROCESS_TYPE} in
     "--purge") ;&
     "--build")
       echo "BUILDING..."
+      sudo apt install curl;
+      echo "Construct webshop skeleton /application/www/assets/ (FUNC.js, MEDIA and STyLE) from latest releases...";
+      echo "Updating MEDIA...";
+      sudo mkdir -p ../debian/etc/webshop/skel/base/www/assets/media;
+      VERSION=`curl -sk --head https://github.com/mrenyard/MEDIA/releases/latest/ | grep -o "location: https://github.com/mrenyard/MEDIA/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"`;
+      sudo tar xvz -C ../debian/etc/webshop/skel/base/www/assets/ < <(wget -q -O - "https://github.com/mrenyard/MEDIA/archive/refs/tags/v${VERSION}.tar.gz");
+      sudo mv ../debian/etc/webshop/skel/base/www/assets/MEDIA-${VERSION}/* ../debian/etc/webshop/skel/base/www/assets/media/;
+      sudo rmdir ../debian/etc/webshop/skel/base/www/assets/MEDIA-${VERSION};
+      echo "Updating STyLE...";
+      mkdir -p ../debian/etc/webshop/skel/base/www/assets/style;
+      VERSION=`curl -sk --head https://github.com/mrenyard/STyLE/releases/latest/ | grep -o "location: https://github.com/mrenyard/STyLE/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"`;
+      sudo tar xvz -C ../debian/etc/webshop/skel/base/www/assets/ < <(wget -q -O - "https://github.com/mrenyard/STyLE/archive/refs/tags/v${VERSION}.tar.gz"); 
+      sudo mv ../debian/etc/webshop/skel/base/www/assets/STyLE-${VERSION}/* ../debian/etc/webshop/skel/base/www/assets/style/;
+      sudo rmdir ../debian/etc/webshop/skel/base/www/assets/STyLE-${VERSION};
+      echo "Updating FUNC.js...";
+      mkdir -p ../debian/etc/webshop/skel/base/www/assets/func;
+      VERSION=`curl -sk --head https://github.com/mrenyard/FUNC.js/releases/latest/ | grep -o "location: https://github.com/mrenyard/FUNC.js/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"`;
+      sudo tar xvz -C ../debian/etc/webshop/skel/base/www/assets/ < <(wget -q -O - "https://github.com/mrenyard/FUNC.js/archive/refs/tags/v${VERSION}.tar.gz");
+      sudo mv ../debian/etc/webshop/skel/base/www/assets/FUNC.js-${VERSION}/* ../debian/etc/webshop/skel/base/www/assets/func/;
+      sudo rmdir ../debian/etc/webshop/skel/base/www/assets/FUNC.js-${VERSION};
       if [ -f ${SAVE_AS} ]; then rm -f ${SAVE_AS}; fi
-      if [ ! $(getent group developer) ]; then sudo addgroup developer; fi
       sudo chmod -R 755 ../debian
       sudo chown -R root:root ../debian/usr;
       sudo chown -R root:root ../debian/etc;
-      sudo chown -R root:root ../debian/var;
       sudo chown -R www-data:www-data ../debian/etc/webshop/skel/application/www;
       sudo chown -R www-data:www-data ../debian/etc/webshop/skel/base/www;
-      sudo chown -R www-data:www-data ../debian/var/www/
       sudo dpkg-deb --build ../debian;
       echo "renaming '../debian.deb' to '${SAVE_AS}'";
       mv ../debian.deb ${SAVE_AS};
       sudo chmod 775 ${SAVE_AS};
       sudo chown ${USER}:${USER} ${SAVE_AS};
       sudo chown -R ${USER}:${USER} ../debian;
+      sudo rm -rf ../debian/etc/webshop/skel/base/www/assets/media
+      sudo rm -rf ../debian/etc/webshop/skel/base/www/assets/style
+      sudo rm -rf ../debian/etc/webshop/skel/base/www/assets/func
       echo "BUILD SUCCESSFULLY COMPLETED!";
       ;;
   esac

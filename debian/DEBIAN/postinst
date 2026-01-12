@@ -3,10 +3,10 @@
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
   echo "USER HOME PATH ${HOME} IS INVALID!";
-  read -p "Enter username: " USERNAME
-  HOME=`echo "/home/${USERNAME}"`;
+  read -p "Enter username: " USER;
+  HOME=`echo "/home/${USER}"`;
 done
-export HOME;
+export HOME user;
 
 echo "CHECKING FOR EXISTANCE OF ${HOME}/Projects/.manifest";
 if [ ! -d ${HOME}/Projects/ ]; then
@@ -16,7 +16,7 @@ if [ ! -f ${HOME}/Projects/.manifest ]; then
   echo "...ADDING ${HOME}/Projects/.manifest file"
   touch ${HOME}/Projects/.manifest;
 fi
-sudo chown -R ${USER}:${USER} ${HOME}/Projects;
+sudo chown -R ${USER}:${USER} ${HOME}/Projects/.manifest;
 
 declare DOMAIN=${HOSTNAME}.lan
 virtualhosts-from-manifest;

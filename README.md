@@ -93,12 +93,12 @@ virtualhosts-from-manifest:
 ```
 ## Initialisation and Installation
 
-You will want to have installed [Apache2-WebShop-Configuration](https://github.com/mrenyard/Apache2-WebShop-Configuration) before installing Web-Project-Managment-Tools, please follow [these instructions](https://github.com/mrenyard/Apache2-WebShop-Configuration?tab=readme-ov-file#initialisation-and-installation-script) to do so.
+> You will want to have installed [Apache2-WebShop-Configuration](https://github.com/mrenyard/Apache2-WebShop-Configuration) before installing Web-Project-Managment-Tools, please follow [these instructions](https://github.com/mrenyard/Apache2-WebShop-Configuration?tab=readme-ov-file#initialisation-and-installation-script) to do so.
 
 
-Download the .deb package to the local directory of your Debian based server (Ubuntu, Linux Mint, MX Linux, Zorin OS, Kali Linux ).
+Download the .deb package to the local directory of your Debian based Linux Server (Ubuntu, Linux Mint, MX Linux, Zorin OS, Kali Linux).
 ```console
-VERSION=`curl -sk --head https://github.com/mrenyard/Web-Project-Managment-Tools/releases/latest/ | grep -o "location: https://github.com/mrenyard/Web-Project-Managment-Tools/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"` &&
+sudo apt install curl && VERSION=`curl -sk --head https://github.com/mrenyard/Web-Project-Managment-Tools/releases/latest/ | grep -o "location: https://github.com/mrenyard/Web-Project-Managment-Tools/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"` &&
 wget https://github.com/mrenyard/Web-Project-Managment-Tools/releases/download/v${VERSION}/webproject-tools_${VERSION}-0_all.deb;
 ```
 <!-- Make sure that it is exacutable
@@ -109,7 +109,16 @@ Install the .deb packeage using `dpkg`
 ```console
 sudo dpkg -i webproject-tools_${VERSION}-0_all.deb;
 ```
-Web-Project-Managment-Tools should now be installed verify by running `webprojects` without any parameters to see the `USAGE:` statement.
+Web-Project-Managment-Tools should now be installed. Verify by running `webproject` without any parameters to see the `USAGE:` statement.
 ```console
 webproject
+```
+
+## TODO
+When using package to build, PULL `func`, `media` and `style` from their latest releases.
+```console
+sudo apt install curl &&
+VERSION=`curl -sk --head https://github.com/mrenyard/RAMP/releases/latest/ | grep -o "location: https://github.com/mrenyard/RAMP/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"` &&
+sudo tar xvz -C /tmp/ < <(wget -q -O - "https://github.com/mrenyard/RAMP/archive/refs/tags/v0.2.tar.gz") &&
+sudo mv /tmp/RAMP/www/assets/ www/assets
 ```

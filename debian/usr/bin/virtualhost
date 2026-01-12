@@ -1,7 +1,9 @@
 #!/bin/bash -eu
 
 declare -r USAGE_STATEMENT="Usage: virtualhost \"PROJECT_NAME\" remove|[add DOMAIN[ --from-manifest]]";
-if [[ "$#" -lt 2 ]]; then echo ${USAGE_STATEMENT}; exit 1; fi
+if [ "$#" -lt 2 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+  echo ${USAGE_STATEMENT}; exit 1;
+fi
 
 PROJECT_NAME=${1};
 declare -r SWITCH=${2};
@@ -13,10 +15,10 @@ declare -r HOST="${HOST,,}";
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
   echo "USER HOME PATH ${HOME} IS INVALID!";
-  read -p "Enter username: " USERNAME
-  HOME=`echo "/home/${USERNAME}"`;
+  read -p "Enter username: " USER
+  HOME=`echo "/home/${USER}"`;
 done
-export HOME;
+export HOME USER;
 
 case ${SWITCH} in
   "add")

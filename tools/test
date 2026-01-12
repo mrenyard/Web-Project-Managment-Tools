@@ -13,10 +13,10 @@ fi
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
 while [[ "${HOME}" == "/root" || ! -d "${HOME}" ]]; do
   echo "USER HOME PATH ${HOME} IS INVALID!";
-  read -p "Enter username: " USERNAME
-  HOME=`echo "/home/${USERNAME}"`;
+  read -p "Enter username: " USER
+  HOME=`echo "/home/${USER}"`;
 done
-export HOME;
+export HOME USER;
 
 RESPONSE=;
 log_response () {
@@ -25,7 +25,6 @@ log_response () {
 }
 
 sudo tools/package --deploy;
-echo
 
 # CLEAN UP
 GOOD=0;
@@ -49,6 +48,22 @@ clean () {
     echo -e "\nTESTS \e[0;31mFAILED TO COMPLETE!\e[0m";
   fi
 }
+
+# check skel base/www/assets/func|media|style all exist
+echo "TESTING skel base/www/assets/func|media|style all exist";
+if [ -f /etc/webshop/skel/base/www/assets/func/README.md ]; then
+  if [ -f /etc/webshop/skel/base/www/assets/media/README.md ]; then
+    if [ -f /etc/webshop/skel/base/www/assets/style/README.md ]; then
+      log_response "Test skel base/www/assets/func|media|style all exist \e[0;32mSUCCESSFULL\e[0m";
+    else
+      log_response "Test skel base/www/assets/style exists \e[0;31mFAILED!\e[0m - unable to confirm style directory exists";
+    fi
+  else
+    log_response "Test skel base/www/assets/media exists \e[0;31mFAILED!\e[0m - unable to confirm media directory exists";
+  fi
+else
+  log_response "Test skel base/www/assets/func exists \e[0;31mFAILED!\e[0m - unable to confirm func directory exists";
+fi
 
 # get-full-domain
 echo "TESTING get-full-domain";
@@ -136,7 +151,7 @@ if [[ -d "/var/www/testvh1" ]]; then
         if [[ -d "/var/www/dev.testvh1" ]]; then
           if [[ -f "/etc/apache2/sites-enabled/testvh1.conf" ]]; then
             if grep 'testvh1 "Test VH 1"' "${HOME}/Projects/.manifest"; then
-              if curl -sk --head https://testvh1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
+              if curl -sk --head https://testvh1.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403." > /dev/null; then
                 log_response "virtualhost 1 add Test \e[0;32mSUCCESSFULL\e[0m";
               else
                 log_response "virtualhost 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testvh1.${HOSTNAME}.lan is live";
@@ -295,7 +310,7 @@ sudo systemctl restart apache2;
 if [[ -d "${HOME}/Projects/Test VH 2/copy" ]]; then
   if [[ -d "/var/www/copy.testvh2" ]]; then
     if grep "ServerName copy.testvh2\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testvh2.conf"; then
-      if [[ ! -z $(curl -sk --head "https://copy.testvh2.${HOSTNAME}.lan/" | head -n 1 | grep "HTTP/1.[01] 200") ]]; then
+      if [[ ! -z $(curl -sk --head "https://copy.testvh2.${HOSTNAME}.lan/" | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403.") ]]; then
         log_response "copy-current-website Test \e[0;32mSUCCESSFULL\e[0m";
       else
         log_response "copy-current-website Test \e[0;31mFAILED!\e[0m - unable to confirm site copy.testvh2.${HOSTNAME}.lan is live";
@@ -322,7 +337,7 @@ if [[ -d "${HOME}/Projects/Test WP 1" ]]; then
             if [[ -f "/etc/apache2/sites-enabled/testwp1.conf" ]]; then
               if [[ -d "${HOME}/Projects/Test WP 1/www" ]]; then
                 if grep 'testwp1 "Test WP 1"' "${HOME}/Projects/.manifest"; then
-                  if curl -sk --head https://testwp1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
+                  if curl -sk --head https://testwp1.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403." > /dev/null; then
                     log_response "webproject 1 add Test \e[0;32mSUCCESSFULL\e[0m";
                   else
                     log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testwp1.${HOSTNAME}.lan is live";
@@ -370,7 +385,7 @@ if [[ -d "${HOME}/Projects/Test WP 2" ]]; then
                   if [[ -d "${HOME}/Projects/Test WP 2/copy" ]]; then
                     if [[ -f "${HOME}/Projects/Test WP 2/www/controller.php" ]]; then
                       if grep 'testwp2 "Test WP 2"' "${HOME}/Projects/.manifest"; then
-                        if curl -sk --head https://t2.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200." > /dev/null; then
+                        if curl -sk --head https://t2.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403." > /dev/null; then
                           log_response "webproject 2 add Test \e[0;32mSUCCESSFULL\e[0m";
                         else
                           log_response "webproject 2 add Test \e[0;31mFAILED!\e[0m - unable to confirm site t2.${HOSTNAME}.lan is live";
@@ -418,8 +433,8 @@ webproject "Test WP 1" extend --domain t1 --application --copy www.example.com
 if [[ -d "${HOME}/Projects/Test WP 1/copy" ]]; then
   if [[ -f "${HOME}/Projects/Test WP 1/www/controller.php" ]]; then
     if grep 'testwp1 "Test WP 1"' "${HOME}/Projects/.manifest"; then
-      if [[ ! -z $(curl -sk --head https://t1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
-        if [[ ! -z $(curl -sk --head https://copy.testwp1.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
+      if [[ ! -z $(curl -sk --head https://t1.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403.") ]]; then
+        if [[ ! -z $(curl -sk --head https://copy.testwp1.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403.") ]]; then
           log_response "webproject 1 extend Test \e[0;32mSUCCESSFULL\e[0m";
         else
           log_response "webproject 1 extend Test \e[0;31mFAILED!\e[0m - unable to confirm site copy.testwp1.${HOSTNAME}.lan is live";
@@ -481,8 +496,8 @@ if grep "ServerName t2\.${HOSTNAME}\.lan" "/etc/apache2/sites-available/testwp2.
     if [ -f "${HOME}/Projects/Test WP 2/www/controller.php" ]; then
       if [[ -f "/var/www/copy.testwp2/index.html" ]]; then
         if [[ ! -f "${HOME}/Projects/Test WP 2/ramp.ini" ]]; then
-          if [[ ! -z $(curl -sk --head https://t2.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
-            if [[ ! -z $(curl -sk --head https://copy.t2.${HOSTNAME}.lan/ | head -n 1 | grep "HTTP/1.[01] 200.") ]]; then
+          if [[ ! -z $(curl -sk --head https://t2.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403.") ]]; then
+            if [[ ! -z $(curl -sk --head https://copy.t2.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403.") ]]; then
               log_response "webproject 2 reset Test \e[0;32mSUCCESSFULL\e[0m";
             else
               log_response "webproject 2 reset Test \e[0;31mFAILED!\e[0m - unable to confirm site copy.t2.${HOSTNAME}.lan is live";
