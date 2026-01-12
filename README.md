@@ -113,12 +113,3 @@ Web-Project-Managment-Tools should now be installed. Verify by running `webproje
 ```console
 webproject
 ```
-
-## TODO
-When using package to build, PULL `func`, `media` and `style` from their latest releases.
-```console
-sudo apt install curl &&
-VERSION=`curl -sk --head https://github.com/mrenyard/RAMP/releases/latest/ | grep -o "location: https://github.com/mrenyard/RAMP/releases/tag/v.*" | cut -d"v" -f2- | tr -d "\r"` &&
-sudo tar xvz -C /tmp/ < <(wget -q -O - "https://github.com/mrenyard/RAMP/archive/refs/tags/v0.2.tar.gz") &&
-sudo mv /tmp/RAMP/www/assets/ www/assets
-```
