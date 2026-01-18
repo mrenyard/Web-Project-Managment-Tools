@@ -1,0 +1,5 @@
+#!/bin/bash
+
+if [ -d /etc/webshop/ ]; then  sudo rm -Rf /etc/webshop; fi
+
+exit 0;

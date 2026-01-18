@@ -31,21 +31,22 @@ GOOD=0;
 trap clean EXIT;
 clean () {
   echo -e "\nCLEAN UP";
-  sudo rm -f /etc/webshop/skel/application/02-userRequierments/update.flag;
-  sudo virtualhost "Test VH 1" remove || true;
-  sudo virtualhost "Test VH 2" remove || true;
-  sudo virtualhost "Test WP 1" remove || true;
-  sudo virtualhost "Test WP 2" remove || true;
+  rm -f /etc/webshop/skel/application/02-userRequierments/update.flag;
+  virtualhost "Test VH 1" remove || true;
+  virtualhost "Test VH 2" remove || true;
+  virtualhost "Test WP 1" remove || true;
+  virtualhost "Test WP 2" remove || true;
   sudo rm -rf "${HOME}/Projects/Test VH 1";
   sudo rm -rf "${HOME}/Projects/Test VH 2";
   sudo rm -rf "${HOME}/Projects/Test WP 1";
   sudo rm -rf "${HOME}/Projects/Test WP 2";
-  sudo systemctl restart apache2.service;
+  systemctl restart apache2.service;
   if [[ ${GOOD} == 1 ]]; then
     echo -e "\nFULL REPORT";
     echo -e $RESPONSE;
   else 
-    echo -e "\nTESTS \e[0;31mFAILED TO COMPLETE!\e[0m";
+    echo -e "\nTESTS \e[0;31mFAILED TO COMPLETE!\e[0m $@";
+    exit 1;
   fi
 }
 
@@ -331,34 +332,67 @@ webproject "Test WP 1" new
 if [[ -d "${HOME}/Projects/Test WP 1" ]]; then
   if [[ -d "/var/www/testwp1" ]]; then
     if [[ -d "/var/www/style.testwp1" ]]; then
-      if [[ -d "/var/www/func.testwp1" ]]; then
-        if [[ -d "/var/www/media.testwp1" ]]; then
-          if [[ -d "/var/www/dev.testwp1" ]]; then
-            if [[ -f "/etc/apache2/sites-enabled/testwp1.conf" ]]; then
-              if [[ -d "${HOME}/Projects/Test WP 1/www" ]]; then
-                if grep 'testwp1 "Test WP 1"' "${HOME}/Projects/.manifest"; then
-                  if curl -sk --head https://testwp1.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403." > /dev/null; then
-                    log_response "webproject 1 add Test \e[0;32mSUCCESSFULL\e[0m";
+      if grep "testwp1.${HOSTNAME}.lan" "${HOME}/Projects/Test WP 1/www/assets/style/docs/base.html"; then
+        TAG_SITE_ID=`echo "testwp1.${HOSTNAME}.lan" | sed 's/\./-/g'`;
+        if grep "${TAG_SITE_ID}" "${HOME}/Projects/Test WP 1/www/assets/style/docs/base.html"; then
+          if [[ -d "/var/www/func.testwp1" ]]; then
+            if grep "testwp1.${HOSTNAME}.lan" "${HOME}/Projects/Test WP 1/www/assets/func/index.html"; then
+              if grep "${TAG_SITE_ID}" "${HOME}/Projects/Test WP 1/www/assets/func/index.html"; then
+                if grep "testwp1.${HOSTNAME}.lan" "${HOME}/Projects/Test WP 1/www/assets/func/docs/drag.scratch"; then
+                  if grep "${TAG_SITE_ID}" "${HOME}/Projects/Test WP 1/www/assets/func/docs/drag.scratch"; then
+                    if [[ -d "/var/www/media.testwp1" ]]; then
+                      if grep "testwp1.${HOSTNAME}.lan" "${HOME}/Projects/Test WP 1/www/assets/media/index.html"; then
+                        if grep "${TAG_SITE_ID}" "${HOME}/Projects/Test WP 1/www/assets/media/index.html"; then
+                          if [[ -d "/var/www/dev.testwp1" ]]; then
+                            if [[ -f "/etc/apache2/sites-enabled/testwp1.conf" ]]; then
+                              if [[ -d "${HOME}/Projects/Test WP 1/www" ]]; then
+                                if grep 'testwp1 "Test WP 1"' "${HOME}/Projects/.manifest"; then
+                                  if curl -sk --head https://testwp1.${HOSTNAME}.lan/ | head -n 1 | grep -E "HTTP/1.[01] 200.|HTTP/1.[01] 403." > /dev/null; then
+                                    log_response "webproject 1 add Test \e[0;32mSUCCESSFULL\e[0m";
+                                  else
+                                    log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testwp1.${HOSTNAME}.lan is live";
+                                  fi
+                                else
+                                  log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest";            
+                                fi
+                              else
+                                log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 1/www'";
+                              fi
+                            else
+                              log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testwp1.conf";
+                            fi
+                          else
+                            log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testwp1";
+                          fi
+                        else
+                          log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site id replacement in ...media/index.html";
+                        fi
+                      else
+                        log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm style domain replacement in ...media/index.html";
+                      fi
+                    else
+                      log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testwp1";
+                    fi
                   else
-                    log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site testwp1.${HOSTNAME}.lan is live";
+                    log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site id replacement in ...func/docs/drag.scratch";
                   fi
                 else
-                  log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm entry in .manifest";            
+                  log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm style domain replacement in ...func/docs/drag.scratch";
                 fi
               else
-                log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte '${HOME}/Projects/Test WP 1/www'";
+                log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site id replacement in ...func/index.html";
               fi
             else
-              log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /etc/apache2/sites-avalible/testwp1.conf";
+              log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm style domain replacement in ...func/index.html";
             fi
           else
-            log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/dev.testwp1";
+            log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testwp1";
           fi
         else
-          log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/media.testwp1";
+          log_response "virtualhost 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm media domain replacement in ...style/docs/base.html";
         fi
       else
-        log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/func.testwp1";
+        log_response "virtualhost 1 add Test \e[0;31mFAILED!\e[0m - unable to confirm site id replacement in ...style/docs/base.html";
       fi
     else
       log_response "webproject 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testwp1";
