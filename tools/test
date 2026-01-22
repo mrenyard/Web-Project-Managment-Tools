@@ -176,7 +176,7 @@ if [[ -d "/var/www/testvh1" ]]; then
     log_response "virtualhost 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/style.testvh1";
   fi
 else
-  log_response "virtualhost 1 add Test \e[0;31mFAILED!\e[0m - unable to localte /var/www/testvh1";
+  log_response "virtualhost 1 add Test \e[0;31mFAILED!\e[0m - unable to locate /var/www/testvh1";
 fi
 
 # virtualhost TestVH1 remove
