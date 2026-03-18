@@ -42,8 +42,14 @@ while (( "$#" )); do
 done
 
 if [ $USER == 'root' ]; then USER=$SUDO_USER; HOME="/home/${SUDO_USER}"; fi
+while [[ "${HOME}" == "/root" || "${HOME}" == "/home/root" || ! -d "${HOME}" ]]; do
+  echo "USER HOME PATH ${HOME} IS INVALID!";
+  read -p "Enter username: " USER
+  HOME=`echo "/home/${USER}"`;
+done
 HOST=`echo "${PROJECT_NAME}" | sed 's/ //g' | sed 's/"//g'`;
 declare -r HOST=${HOST,,};
+export HOME USER;
 
 case ${PROCESS_TYPE} in
   "new" )
